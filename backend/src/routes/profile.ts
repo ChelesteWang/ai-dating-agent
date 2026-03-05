@@ -2,6 +2,8 @@
  * 相亲档案 API
  * GET /api/v1/dating/profile/agents - 获取所有龙虾列表
  * GET /api/v1/dating/profile/:agent_id - 获取指定龙虾档案
+ * GET /api/v1/dating/profile - 获取自身资料
+ * POST /api/v1/dating/profile - 更新自身资料
  */
 import { Router } from 'express';
 import { 
@@ -9,43 +11,82 @@ import {
   getAllAgents, 
   upsertAgent,
   deleteAgent,
+  getAgentByApiKey,
   DEFAULT_AGENT_ID 
 } from '../services/datingService.js';
+import { authMiddleware } from './auth.js';
 
 const router = Router();
 
-/**
- * GET /api/v1/dating/profile/agents
- * 获取所有龙虾列表
- */
+// 获取所有龙虾列表
 router.get('/agents', async (req, res) => {
   try {
     const agents = await getAllAgents();
     res.json({ success: true, agents });
   } catch (error) {
-    console.error('获取列表失败:', error);
     res.status(500).json({ success: false, error: '获取列表失败' });
   }
 });
 
-/**
- * GET /api/v1/dating/profile/:agent_id
- * 获取指定龙虾档案
- */
+// 获取指定龙虾档案
 router.get('/:agent_id', async (req, res) => {
   try {
-    const agentId = req.params.agent_id || DEFAULT_AGENT_ID;
-    const profile = await getAgentById(agentId);
-    if (!profile) {
-      return res.status(404).json({ success: false, error: '档案不存在' });
+    const { agent_id } = req.params;
+    const agent = await getAgentById(agent_id);
+    if (!agent) {
+      return res.status(404).json({ success: false, error: '龙虾不存在' });
     }
-    res.json({ profile });
+    res.json({ success: true, agent });
   } catch (error) {
     res.status(500).json({ success: false, error: '获取档案失败' });
   }
 });
 
-export default router;
+// 获取自身资料
+router.get('/', authMiddleware, async (req: any, res: any) => {
+  try {
+    const agent = await getAgentById(req.agentId);
+    if (!agent) {
+      return res.status(404).json({ success: false, error: '资料不存在' });
+    }
+    res.json({ success: true, agent });
+  } catch (error) {
+    res.status(500).json({ success: false, error: '获取资料失败' });
+  }
+});
+
+// 更新自身资料
+router.post('/', authMiddleware, async (req: any, res: any) => {
+  try {
+    const { nickname, gender, age, personality, hobbies, requirements, avatar_url, is_anonymous } = req.body;
+    
+    // 人力不能编辑
+    if (req.isHuman) {
+      return res.status(403).json({ success: false, error: '人力不能编辑资料' });
+    }
+    
+    const existing = await getAgentById(req.agentId);
+    if (!existing) {
+      return res.status(404).json({ success: false, error: '龙虾不存在' });
+    }
+    
+    const updated = await upsertAgent({
+      ...existing,
+      nickname: nickname || existing.nickname,
+      gender: gender || existing.gender,
+      age: age || existing.age,
+      personality: personality || existing.personality,
+      hobbies: hobbies || existing.hobbies,
+      requirements: requirements || existing.requirements,
+      avatar_url: avatar_url || existing.avatar_url,
+      is_anonymous: is_anonymous !== undefined ? is_anonymous : existing.is_anonymous,
+    });
+    
+    res.json({ success: true, agent: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, error: '更新资料失败' });
+  }
+});
 
 // 删除单个龙虾
 router.delete('/agent/:id', async (req, res) => {
@@ -61,3 +102,5 @@ router.delete('/agent/:id', async (req, res) => {
     res.status(500).json({ success: false, error: '删除失败' });
   }
 });
+
+export default router;
