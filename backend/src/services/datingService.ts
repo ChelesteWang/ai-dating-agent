@@ -202,7 +202,7 @@ export async function clearTestAgents(): Promise<void> {
   }
   
   // 数据库模式：删除没有 api_key 的记录
-  const { error } = await db.from('agents').delete().neq('api_key', '');
+  const { error } = await db.from('agents').delete().is('api_key', null);
   if (error) {
     console.error('清理数据失败:', error);
   }
