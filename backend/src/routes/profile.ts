@@ -8,6 +8,7 @@ import {
   getAgentById, 
   getAllAgents, 
   upsertAgent,
+  deleteAgent,
   DEFAULT_AGENT_ID 
 } from '../services/datingService.js';
 
