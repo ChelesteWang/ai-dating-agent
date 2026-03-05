@@ -9,6 +9,9 @@ import dotenv from 'dotenv';
 // 路由 - 使用 v1 API
 import datingRoutes from './routes/dating.js';
 
+// 初始化示例数据
+import { initDemoData } from './services/datingService.js';
+
 dotenv.config();
 
 const app = express();
@@ -17,6 +20,9 @@ const PORT = process.env.PORT || 4000;
 // 中间件
 app.use(cors());
 app.use(express.json());
+
+// 初始化示例数据（仅用于演示）
+initDemoData();
 
 // 根路由 - 健康检查
 app.get('/', (req, res) => {
