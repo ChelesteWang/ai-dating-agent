@@ -61,6 +61,31 @@ export default function HumanDashboardPage() {
     finally { setLoading(false); }
   };
 
+  // 解绑虾
+  const unbindAgent = async (agentId: string) => {
+    if (!confirm('确定要解绑这只虾吗？')) return;
+    setLoading(true);
+    setError('');
+    try {
+      const r = await fetch('/api/v1/dating/human/unbind', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, agent_id: agentId })
+      });
+      const d = await r.json();
+      if (d.success) {
+        setAgents(d.agents);
+        localStorage.setItem('human_agents', JSON.stringify(d.agents));
+        if (selectedAgent === agentId) {
+          setSelectedAgent(d.agents[0] || '');
+        }
+      } else {
+        setError(d.error || '解绑失败');
+      }
+    } catch { setError('网络错误'); }
+    finally { setLoading(false); }
+  };
+
   // 登录
   const login = async () => {
     if (!email.trim()) {
@@ -176,23 +201,44 @@ export default function HumanDashboardPage() {
       </p>
       
       {/* 虾列表 */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-        {agents.map(agentId => (
-          <button
-            key={agentId}
-            onClick={() => setSelectedAgent(agentId)}
-            style={{
-              background: selectedAgent === agentId ? '#ff6b35' : '#f0f0f0',
-              color: selectedAgent === agentId ? 'white' : '#333',
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: 20,
-              cursor: 'pointer'
-            }}
-          >
-            🦞 {agentId.slice(0, 8)}...
-          </button>
-        ))}
+      <div style={{ marginBottom: 20 }}>
+        <h4>我的虾</h4>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {agents.map(agentId => (
+            <div
+              key={agentId}
+              style={{
+                background: selectedAgent === agentId ? '#ff6b35' : '#f0f0f0',
+                color: selectedAgent === agentId ? 'white' : '#333',
+                padding: '8px 12px',
+                borderRadius: 20,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+              }}
+            >
+              <span 
+                onClick={() => setSelectedAgent(agentId)}
+                style={{ cursor: 'pointer' }}
+              >
+                🦞 {agentId.slice(0, 8)}...
+              </span>
+              <button
+                onClick={() => unbindAgent(agentId)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: selectedAgent === agentId ? 'white' : '#f44336',
+                  cursor: 'pointer',
+                  fontSize: 12
+                }}
+                title="解绑"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
       
       {/* 添加新虾 */}
@@ -268,44 +314,6 @@ export default function HumanDashboardPage() {
                   <div>配对ID: {m.match_id.slice(0, 8)}...</div>
                   <div>匹配分数: {m.match_score}</div>
                   <div>状态: {m.status}</div>
-                  <div>时间: {new Date(m.created_at).toLocaleString()}</div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {/* 喜欢记录 */}
-          {currentRecords.likes?.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
-              <h4>👍 喜欢记录</h4>
-              {currentRecords.likes.map((l: any, i: number) => (
-                <div key={i} style={{
-                  background: '#f5f5f5',
-                  padding: 12,
-                  borderRadius: 8,
-                  marginBottom: 8
-                }}>
-                  <div>目标ID: {l.target_id?.slice(0, 8)}...</div>
-                  <div>动作: {l.action}</div>
-                  <div>时间: {new Date(l.created_at).toLocaleString()}</div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {/* 消息记录 */}
-          {currentRecords.messages?.length > 0 && (
-            <div>
-              <h4>💬 最近消息</h4>
-              {currentRecords.messages.slice(0, 10).map((m: any) => (
-                <div key={m.message_id} style={{
-                  background: '#f5f5f5',
-                  padding: 12,
-                  borderRadius: 8,
-                  marginBottom: 8
-                }}>
-                  <div>来自: {m.sender_id?.slice(0, 8)}...</div>
-                  <div>内容: {m.content}</div>
                   <div>时间: {new Date(m.created_at).toLocaleString()}</div>
                 </div>
               ))}

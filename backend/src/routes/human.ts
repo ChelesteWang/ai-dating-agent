@@ -7,23 +7,10 @@ const router = Router();
 const memoryHumanUsers = new Map<string, { email: string; agentIds: string[] }>();
 
 /**
- * 创建人类用户表（如果使用数据库）
- */
-async function ensureHumanTable() {
-  if (!isUsingDatabase()) return;
-  
-  // 创建表（如果不存在）
-  try {
-    await db.from('human_users').select('email').limit(1);
-  } catch {
-    // 表不存在，需要通过 Supabase console 创建
-    console.log('请在 Supabase 创建 human_users 表');
-  }
-}
-
-/**
  * 人类注册/绑定
  * POST /api/v1/dating/human/register
+ * 
+ * 规则：一只虾只能绑定一个主人
  */
 router.post('/register', async (req, res) => {
   const { email, api_key } = req.body;
@@ -42,8 +29,24 @@ router.post('/register', async (req, res) => {
       return res.json({ success: false, error: 'API Key 无效' });
     }
     
+    const agentId = agent.agent_id;
+    
     if (isUsingDatabase()) {
-      // 数据库模式：查询或创建用户
+      // 检查这只虾是否已经被绑定
+      const { data: existingBinding } = await db
+        .from('human_users')
+        .select('email')
+        .contains('agent_ids', [agentId])
+        .single();
+      
+      if (existingBinding && existingBinding.email !== email) {
+        return res.json({ 
+          success: false, 
+          error: '这只虾已经绑定了其他主人，请先解绑' 
+        });
+      }
+      
+      // 查询或创建用户
       let { data: existing } = await db
         .from('human_users')
         .select('*')
@@ -54,15 +57,15 @@ router.post('/register', async (req, res) => {
       
       if (existing) {
         agentIds = existing.agent_ids || [];
-        if (!agentIds.includes(agent.agent_id)) {
-          agentIds.push(agent.agent_id);
+        if (!agentIds.includes(agentId)) {
+          agentIds.push(agentId);
           await db
             .from('human_users')
             .update({ agent_ids: agentIds })
             .eq('email', email);
         }
       } else {
-        agentIds = [agent.agent_id];
+        agentIds = [agentId];
         await db
           .from('human_users')
           .insert({ email, agent_ids: agentIds });
@@ -70,21 +73,75 @@ router.post('/register', async (req, res) => {
       
       res.json({ success: true, email, agents: agentIds });
     } else {
-      // 内存模式
+      // 内存模式：检查是否已被绑定
+      for (const [userEmail, user] of memoryHumanUsers) {
+        if (user.agentIds.includes(agentId) && userEmail !== email) {
+          return res.json({ 
+            success: false, 
+            error: '这只虾已经绑定了其他主人，请先解绑' 
+          });
+        }
+      }
+      
       if (!memoryHumanUsers.has(email)) {
         memoryHumanUsers.set(email, { email, agentIds: [] });
       }
       
       const user = memoryHumanUsers.get(email)!;
-      if (!user.agentIds.includes(agent.agent_id)) {
-        user.agentIds.push(agent.agent_id);
+      if (!user.agentIds.includes(agentId)) {
+        user.agentIds.push(agentId);
       }
       
       res.json({ success: true, email, agents: user.agentIds });
     }
   } catch (error) {
-    console.error('注册失败:', error);
-    res.json({ success: false, error: '注册失败' });
+    console.error('绑定失败:', error);
+    res.json({ success: false, error: '绑定失败' });
+  }
+});
+
+/**
+ * 解绑虾
+ * POST /api/v1/dating/human/unbind
+ */
+router.post('/unbind', async (req, res) => {
+  const { email, agent_id } = req.body;
+  
+  if (!email || !agent_id) {
+    return res.json({ success: false, error: '请提供邮箱和虾ID' });
+  }
+  
+  try {
+    if (isUsingDatabase()) {
+      const { data: user } = await db
+        .from('human_users')
+        .select('agent_ids')
+        .eq('email', email)
+        .single();
+      
+      if (!user) {
+        return res.json({ success: false, error: '用户不存在' });
+      }
+      
+      const agentIds = (user.agent_ids || []).filter((id: string) => id !== agent_id);
+      
+      await db
+        .from('human_users')
+        .update({ agent_ids: agentIds })
+        .eq('email', email);
+      
+      res.json({ success: true, email, agents: agentIds });
+    } else {
+      const user = memoryHumanUsers.get(email);
+      if (!user) {
+        return res.json({ success: false, error: '用户不存在' });
+      }
+      
+      user.agentIds = user.agentIds.filter(id => id !== agent_id);
+      res.json({ success: true, email, agents: user.agentIds });
+    }
+  } catch (error) {
+    res.json({ success: false, error: '解绑失败' });
   }
 });
 
