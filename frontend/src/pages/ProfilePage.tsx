@@ -15,7 +15,7 @@ export default function ProfilePage() {
     setError('');
     try {
       const r = await fetch('/api/v1/dating/profile', {
-        headers: { 'X-API-Key': apiKey || '' }
+        headers: { 'Authorization': apiKey || '' }
       });
       const d = await r.json();
       if (d.success) setProfile(d.profile);

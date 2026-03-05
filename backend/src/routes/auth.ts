@@ -72,7 +72,7 @@ router.post('/login', async (req, res) => {
  */
 router.get('/me', async (req, res) => {
   try {
-    const apiKey = req.headers['x-api-key'] as string;
+    const apiKey = req.headers['authorization']?.replace('Bearer ', '') as string;
     if (!apiKey) {
       return res.status(401).json({ success: false, error: '未登录' });
     }
@@ -92,7 +92,7 @@ router.get('/me', async (req, res) => {
  * 认证中间件
  */
 export async function authMiddleware(req: any, res: any, next: any) {
-  const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+  const apiKey = req.headers['authorization']?.replace('Bearer ', '');
   
   if (!apiKey) {
     req.agentId = DEFAULT_AGENT_ID;
