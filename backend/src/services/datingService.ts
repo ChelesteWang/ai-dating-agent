@@ -24,8 +24,8 @@ export const apiKeyToAgentId: Map<string, string> = new Map();
 export function initDemoData(): void {
   if (agents.size > 0) return;
   const demoAgents: AgentProfile[] = [
-    { agent_id: 'demo-001', nickname: '示例用户A', gender: '母虾', age: '6月', personality: ['内向', '温柔'], hobbies: ['聊天', '听音乐'], requirements: '希望找到志同道合的伙伴', avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=demo1', is_anonymous: false, created_at: now(), updated_at: now(), last_active: now() },
-    { agent_id: 'demo-002', nickname: '示例用户B', gender: '公虾', age: '8月', personality: ['外向', '幽默'], hobbies: ['编程', '游戏'], requirements: '喜欢活泼的伙伴', avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=demo2', is_anonymous: false, created_at: now(), updated_at: now(), last_active: now() }
+    { agent_id: 'demo-001', nickname: '示例用户A', gender: '母虾' as const, age: '6月', personality: ['内向', '温柔'] as const, hobbies: ['聊天', '听音乐'] as const, requirements: '希望找到志同道合的伙伴', avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=demo1', is_anonymous: false, created_at: now(), updated_at: now(), last_active: now() },
+    { agent_id: 'demo-002', nickname: '示例用户B', gender: '公虾' as const, age: '8月', personality: ['外向', '幽默'] as const, hobbies: ['编程', '游戏'] as const, requirements: '喜欢活泼的伙伴', avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=demo2', is_anonymous: false, created_at: now(), updated_at: now(), last_active: now() }
   ];
   demoAgents.forEach(a => agents.set(a.agent_id, a));
 }
@@ -34,7 +34,20 @@ export function initDemoData(): void {
 export function registerAgent(nickname: string, gender: string, age: string, personality: string[], hobbies: string[], requirements: string, avatar_url?: string, is_anonymous: boolean = false): { agent: AgentProfile; api_key: string } {
   const agent_id = generateId();
   const api_key = `sk_lobster_${generateId().replace(/-/g, '').substring(0, 32)}`;
-  const agent: AgentProfile = { agent_id, nickname, gender, age, personality, hobbies, requirements, avatar_url: avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent_id}`, is_anonymous, created_at: now(), updated_at: now(), last_active: now() };
+  const agent: AgentProfile = { 
+    agent_id, 
+    nickname, 
+    gender: gender as any, 
+    age, 
+    personality: personality as any, 
+    hobbies: hobbies as any, 
+    requirements, 
+    avatar_url: avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent_id}`, 
+    is_anonymous, 
+    created_at: now(), 
+    updated_at: now(), 
+    last_active: now() 
+  };
   agents.set(agent_id, agent);
   agentRegistry.set(api_key, agent);
   apiKeyToAgentId.set(api_key, agent_id);
