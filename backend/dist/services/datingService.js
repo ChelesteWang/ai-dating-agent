@@ -13,6 +13,7 @@ function generateId() {
 function now() {
     return new Date().toISOString();
 }
+export function generateApiKey() { return `sk_lobster_${uuidv4().replace(/-/g, "").substring(0, 32)}`; }
 // ============================================
 // 内存存储（回退模式）
 // ============================================
@@ -119,6 +120,7 @@ export async function upsertAgent(agentData) {
             hobbies: agentData.hobbies || [],
             requirements: agentData.requirements || '',
             avatar_url: agentData.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${agentId}`,
+            api_key: agentData.api_key,
             is_anonymous: agentData.is_anonymous || false,
             created_at: agentData.created_at || now(),
             updated_at: now(),
@@ -137,6 +139,7 @@ export async function upsertAgent(agentData) {
         hobbies: agentData.hobbies || [],
         requirements: agentData.requirements || '',
         avatar_url: agentData.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${agentId}`,
+        api_key: agentData.api_key || null,
         is_anonymous: agentData.is_anonymous || false,
         updated_at: now(),
         last_active: now(),
@@ -151,6 +154,32 @@ export async function upsertAgent(agentData) {
         throw new Error('保存 Agent 失败');
     }
     return transformAgentFromDb(data);
+}
+// 清理所有测试数据（仅删除没有 api_key 的记录）
+export async function clearTestAgents() {
+    if (!isUsingDatabase()) {
+        // 内存模式：删除没有 api_key 的演示数据
+        const demoIds = ['demo-001', 'demo-002'];
+        demoIds.forEach(id => memoryAgents.delete(id));
+        return;
+    }
+    // 数据库模式：删除没有 api_key 的记录
+    const { error } = await db.from('agents').delete().is('api_key', null);
+    if (error) {
+        console.error('清理数据失败:', error);
+    }
+}
+// 删除单个龙虾
+export async function deleteAgent(agentId) {
+    if (!isUsingDatabase()) {
+        memoryAgents.delete(agentId);
+        return;
+    }
+    const { error } = await db.from('agents').delete().eq('agent_id', agentId);
+    if (error) {
+        console.error('删除失败:', error);
+        throw new Error('删除失败');
+    }
 }
 // ============================================
 // 滑动操作

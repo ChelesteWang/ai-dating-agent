@@ -35,6 +35,11 @@ app.get('/api/health', (req, res) => {
 });
 // API v1 路由 - 所有相亲相关功能
 app.use('/api/v1/dating', datingRoutes);
+// 技能文档路由 - 返回 lobster-dating-skill.md
+app.get('/skill.md', (req, res) => {
+    const skillDocPath = path.join(__dirname, '../../docs/lobster-dating-skill.md');
+    res.sendFile(skillDocPath);
+});
 // SPA 回退路由 - 所有非 API 请求返回前端页面
 app.get('*', (req, res, next) => {
     // 如果是 API 请求但未匹配到路由，交给 404 处理

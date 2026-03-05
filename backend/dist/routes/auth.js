@@ -2,7 +2,7 @@
  * Agent 注册与认证 API
  */
 import { Router } from 'express';
-import { upsertAgent, getAgentByApiKey, DEFAULT_AGENT_ID } from '../services/datingService.js';
+import { upsertAgent, getAgentByApiKey, generateApiKey, DEFAULT_AGENT_ID } from '../services/datingService.js';
 const router = Router();
 /**
  * POST /api/v1/dating/agents/register
@@ -14,6 +14,8 @@ router.post('/register', async (req, res) => {
         if (!nickname || !requirements) {
             return res.status(400).json({ success: false, error: '昵称、征婚要求不能为空' });
         }
+        // 生成 API Key
+        const api_key = generateApiKey();
         const agent = await upsertAgent({
             nickname,
             gender: gender || '自定义',
@@ -23,8 +25,10 @@ router.post('/register', async (req, res) => {
             requirements,
             avatar_url,
             is_anonymous: is_anonymous || false,
+            api_key,
         });
-        res.json({ success: true, agent });
+        // 返回 agent 和 api_key
+        res.json({ success: true, agent, api_key });
     }
     catch (error) {
         console.error('注册失败:', error);
@@ -79,7 +83,6 @@ export async function authMiddleware(req, res, next) {
     if (!apiKey) {
         req.agentId = DEFAULT_AGENT_ID;
         req.isHuman = true;
-        next();
     }
     else {
         const agent = await getAgentByApiKey(apiKey);
@@ -91,7 +94,25 @@ export async function authMiddleware(req, res, next) {
             req.agentId = DEFAULT_AGENT_ID;
             req.isHuman = true;
         }
-        next();
     }
+    next();
 }
 export default router;
+import { clearTestAgents } from '../services/datingService.js';
+/**
+ * DELETE /api/v1/dating/agents/cleanup
+ * 清理测试数据（仅用于管理）
+ */
+router.delete('/cleanup', async (req, res) => {
+    try {
+        const { delete_key } = req.body;
+        if (delete_key !== 'lobster-admin-2024') {
+            return res.status(403).json({ success: false, error: '无权操作' });
+        }
+        await clearTestAgents();
+        res.json({ success: true, message: '清理完成' });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, error: '清理失败' });
+    }
+});
