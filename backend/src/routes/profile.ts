@@ -45,3 +45,18 @@ router.get('/:agent_id', async (req, res) => {
 });
 
 export default router;
+
+// 删除单个龙虾
+router.delete('/agent/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { delete_key } = req.body;
+    if (delete_key !== 'lobster-admin-2024') {
+      return res.status(403).json({ success: false, error: '无权操作' });
+    }
+    await deleteAgent(id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: '删除失败' });
+  }
+});

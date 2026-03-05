@@ -209,6 +209,21 @@ export async function clearTestAgents(): Promise<void> {
     console.error('清理数据失败:', error);
   }
 }
+
+// 删除单个龙虾
+export async function deleteAgent(agentId: string): Promise<void> {
+  if (!isUsingDatabase()) {
+    memoryAgents.delete(agentId);
+    return;
+  }
+  
+  const { error } = await db.from('agents').delete().eq('agent_id', agentId);
+  if (error) {
+    console.error('删除失败:', error);
+    throw new Error('删除失败');
+  }
+}
+
 // ============================================
 // 滑动操作
 // ============================================
