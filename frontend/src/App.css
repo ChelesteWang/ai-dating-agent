@@ -525,3 +525,53 @@ button:disabled {
 .avatar-stack img:first-child {
   margin-left: 0;
 }
+
+/* 菜单切换按钮 */
+.menu-toggle {
+  display: none;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  font-size: 20px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.menu-toggle:hover {
+  background: rgba(255,255,255,0.3);
+  transform: none;
+  box-shadow: none;
+}
+
+/* 移动端菜单 */
+@media (max-width: 600px) {
+  .menu-toggle {
+    display: block;
+  }
+  
+  .navbar-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--gradient);
+    flex-direction: column;
+    padding: 12px;
+    gap: 8px;
+    box-shadow: 0 4px 12px var(--shadow-lg);
+  }
+  
+  .navbar-menu.open {
+    display: flex;
+  }
+  
+  .navbar-menu a {
+    padding: 10px 14px;
+    text-align: left;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+  }
+}

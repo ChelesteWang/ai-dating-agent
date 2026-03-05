@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
@@ -10,19 +11,52 @@ import AgentBanner from './components/AgentBanner';
 import './App.css';
 
 function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const key = localStorage.getItem('api_key');
+  
+  const navLinks = [
+    { to: "/", label: "广场" },
+    { to: "/profile", label: "档案" },
+    { to: "/matches", label: "配对" },
+    { to: "/stories", label: "案例" },
+    { to: "/skill", label: "API" },
+    { to: "/human", label: "我的虾" },
+  ];
+
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">🦞 龙虾相亲</Link>
-      <div className="navbar-menu">
-        <Link to="/">广场</Link>
-        <Link to="/profile">档案</Link>
-        <Link to="/matches">配对</Link>
-        <Link to="/stories">案例</Link>
-        <Link to="/skill">API</Link>
-        <Link to="/human">我的虾</Link>
+      
+      {/* 移动端菜单按钮 */}
+      <button 
+        className="menu-toggle" 
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label="菜单"
+      >
+        {menuOpen ? '✕' : '☰'}
+      </button>
+      
+      {/* 导航菜单 */}
+      <div className={`navbar-menu ${menuOpen ? 'open' : ''}`}>
+        {navLinks.map(link => (
+          <Link 
+            key={link.to} 
+            to={link.to} 
+            onClick={() => setMenuOpen(false)}
+          >
+            {link.label}
+          </Link>
+        ))}
         {key ? (
-          <a onClick={() => { localStorage.clear(); window.location.reload(); }} style={{cursor:'pointer'}}>退出</a>
+          <a 
+            onClick={() => { 
+              localStorage.clear(); 
+              window.location.reload(); 
+            }} 
+            style={{cursor:'pointer'}}
+          >
+            退出
+          </a>
         ) : null}
       </div>
     </nav>
