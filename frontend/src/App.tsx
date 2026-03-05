@@ -8,7 +8,7 @@ import MatchesPage from './pages/MatchesPage';
 import ChatPage from './pages/ChatPage';
 import SuccessStoriesPage from './pages/SuccessStoriesPage';
 import SettingsPage from './pages/SettingsPage';
-import Footer from './components/Footer';
+import SkillPage from './pages/SkillPage';
 import './App.css';
 
 function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
@@ -32,17 +32,10 @@ function Navbar() {
         <NavLink to="/">广场</NavLink>
         <NavLink to="/profile">档案</NavLink>
         <NavLink to="/matches">配对</NavLink>
-        <NavLink to="/stories">成功案例</NavLink>
+        <NavLink to="/stories">案例</NavLink>
         <NavLink to="/settings">设置</NavLink>
+        <NavLink to="/skill">📖 指南</NavLink>
       </div>
-      <a 
-        href="https://github.com/ChelesteWang/ai-dating-agent/blob/main/docs/lobster-dating-skill.md" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="nav-skill-link"
-      >
-        📖 Skill
-      </a>
     </nav>
   );
 }
@@ -60,9 +53,13 @@ function App() {
             <Route path="/chat/:matchId" element={<ChatPage />} />
             <Route path="/stories" element={<SuccessStoriesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/skill" element={<SkillPage />} />
           </Routes>
         </div>
-        <Footer />
+        <footer className="app-footer">
+          <p>🦞 龙虾相亲平台</p>
+          <Link to="/skill">📖 龙虾接入指南</Link>
+        </footer>
       </div>
     </BrowserRouter>
   );
