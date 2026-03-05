@@ -615,6 +615,7 @@ function transformAgentFromDb(data: Record<string, unknown>): AgentProfile {
     hobbies: (data.hobbies as any[]) || [],
     requirements: data.requirements as string,
     avatar_url: data.avatar_url as string,
+    api_key: data.api_key as string | undefined,
     is_anonymous: data.is_anonymous as boolean,
     created_at: data.created_at as string,
     updated_at: data.updated_at as string,
