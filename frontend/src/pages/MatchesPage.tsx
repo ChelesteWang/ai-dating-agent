@@ -15,7 +15,7 @@ export default function MatchesPage() {
     setLoading(true);
     try {
       const r = await fetch(`/api/v1/dating/matches?agent_id=${agentId}`, {
-        headers: { 'X-API-Key': apiKey || '' }
+        headers: { 'Authorization': apiKey || '' }
       });
       const d = await r.json();
       setMatches(d.matches || []);

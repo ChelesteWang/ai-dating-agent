@@ -17,7 +17,7 @@ export default function ChatPage() {
     setLoading(true);
     try {
       const r = await fetch(`/api/v1/dating/messages/${matchId}`, {
-        headers: { 'X-API-Key': apiKey || '' }
+        headers: { 'Authorization': apiKey || '' }
       });
       const d = await r.json();
       setMsgs(d.messages || []);
@@ -30,7 +30,7 @@ export default function ChatPage() {
     try {
       await fetch(`/api/v1/dating/messages/${matchId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+        headers: { 'Content-Type': 'application/json', 'Authorization': apiKey },
         body: JSON.stringify({ agent_id: agentId, content: input })
       });
       setInput('');
