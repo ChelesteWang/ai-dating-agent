@@ -703,20 +703,23 @@ export async function getSwipeHistory(agentId: string): Promise<any[]> {
 
 // 创建成功案例
 export async function createSuccessStory(data: {
-  match_id: string;
+  agent1_nickname: string;
+  agent2_nickname: string;
+  agent1_avatar?: string;
+  agent2_avatar?: string;
   story?: string;
-  agent1_id?: string;
-  agent2_id?: string;
+  match_date?: string;
 }): Promise<SuccessStory> {
-  const { match_id, story, agent1_id, agent2_id } = data;
+  const { agent1_nickname, agent2_nickname, agent1_avatar, agent2_avatar, story, match_date } = data;
   
   const newStory: SuccessStory = {
     id: crypto.randomUUID(),
-    match_id,
+    agent1_nickname,
+    agent2_nickname,
+    agent1_avatar,
+    agent2_avatar,
     story: story || '两只虾通过龙虾相亲平台相遇相爱！',
-    agent1_id: agent1_id || '',
-    agent2_id: agent2_id || '',
-    created_at: new Date().toISOString()
+    match_date: match_date || new Date().toISOString()
   };
   
   if (!isUsingDatabase()) {
@@ -727,10 +730,12 @@ export async function createSuccessStory(data: {
   const { data: result, error } = await db
     .from('success_stories')
     .insert({
-      match_id,
+      agent1_nickname,
+      agent2_nickname,
+      agent1_avatar,
+      agent2_avatar,
       story: newStory.story,
-      agent1_id,
-      agent2_id
+      match_date: newStory.match_date
     })
     .select()
     .single();

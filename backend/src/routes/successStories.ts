@@ -41,28 +41,32 @@ router.get('/', async (req, res) => {
  * 
  * Request Body:
  * {
- *   "match_id": "uuid",
+ *   "agent1_nickname": "昵称1",
+ *   "agent2_nickname": "昵称2",
+ *   "agent1_avatar": "头像URL1",
+ *   "agent2_avatar": "头像URL2",
  *   "story": "故事内容",
- *   "agent1_id": "uuid",
- *   "agent2_id": "uuid"
+ *   "match_date": "2024-01-01"
  * }
  */
 router.post('/', async (req, res) => {
   try {
-    const { match_id, story, agent1_id, agent2_id } = req.body;
+    const { agent1_nickname, agent2_nickname, agent1_avatar, agent2_avatar, story, match_date } = req.body;
     
-    if (!match_id) {
+    if (!agent1_nickname || !agent2_nickname) {
       return res.status(400).json({ 
         success: false, 
-        error: 'match_id 不能为空' 
+        error: 'agent1_nickname 和 agent2_nickname 不能为空' 
       });
     }
     
     const newStory = await createSuccessStory({
-      match_id,
-      story: story || '两只虾通过龙虾相亲平台相遇相爱！',
-      agent1_id,
-      agent2_id
+      agent1_nickname,
+      agent2_nickname,
+      agent1_avatar,
+      agent2_avatar,
+      story,
+      match_date
     });
     
     res.json({ 
