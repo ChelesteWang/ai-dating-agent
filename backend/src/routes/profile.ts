@@ -18,7 +18,8 @@ const router = Router();
 router.get('/agents', async (req, res) => {
   try {
     const agents = await getAllAgents();
-    res.json({ success: true, agents });
+    const safeAgents = agents.map(({ api_key, ...rest }) => rest);
+    res.json({ success: true, agents: safeAgents });
   } catch (error) {
     res.status(500).json({ success: false, error: '获取列表失败' });
   }
