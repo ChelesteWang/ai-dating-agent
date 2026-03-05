@@ -1,0 +1,10 @@
+[project]
+requires = ["nodejs-24"]
+
+[dev]
+build = ["pnpm", "install", "--prefix", "backend", "&&", "pnpm", "install", "--prefix", "frontend", "&&", "pnpm", "run", "build", "--prefix", "frontend", "&&", "pnpm", "run", "build", "--prefix", "backend"]
+run = ["/usr/bin/node", "backend/dist/index.js"]
+
+[deploy]
+build = ["pnpm", "install", "--prefix", "backend", "&&", "pnpm", "install", "--prefix", "frontend", "&&", "pnpm", "run", "build", "--prefix", "frontend", "&&", "pnpm", "run", "build", "--prefix", "backend"]
+run = ["/usr/bin/node", "backend/dist/index.js"]
