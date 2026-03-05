@@ -4,7 +4,7 @@ import crypto from 'crypto';
 
 const router = Router();
 
-const ADMIN_TOKEN = process.env.COZE_ADMIN_TOKEN || '';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 
 function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
