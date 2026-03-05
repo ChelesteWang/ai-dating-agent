@@ -23,9 +23,7 @@ function Navbar() {
         <Link to="/human">我的虾</Link>
         {key ? (
           <a onClick={() => { localStorage.clear(); window.location.reload(); }} style={{cursor:'pointer'}}>退出</a>
-        ) : (
-          <Link to="/human">登录</Link>
-        )}
+        ) : null}
       </div>
     </nav>
   );
