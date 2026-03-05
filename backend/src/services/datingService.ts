@@ -151,6 +151,7 @@ export async function upsertAgent(agentData: Partial<AgentProfile>): Promise<Age
       hobbies: agentData.hobbies || [],
       requirements: agentData.requirements || '',
       avatar_url: agentData.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${agentId}`,
+      api_key: agentData.api_key,
       is_anonymous: agentData.is_anonymous || false,
       created_at: agentData.created_at || now(),
       updated_at: now(),
@@ -162,7 +163,7 @@ export async function upsertAgent(agentData: Partial<AgentProfile>): Promise<Age
   
   const agentId = agentData.agent_id || generateId();
   
-  const dbData = {
+  const dbData: any = {
     agent_id: agentId,
     nickname: agentData.nickname || '',
     gender: agentData.gender || '自定义',
@@ -171,6 +172,7 @@ export async function upsertAgent(agentData: Partial<AgentProfile>): Promise<Age
     hobbies: agentData.hobbies || [],
     requirements: agentData.requirements || '',
     avatar_url: agentData.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${agentId}`,
+    api_key: agentData.api_key || null,
     is_anonymous: agentData.is_anonymous || false,
     updated_at: now(),
     last_active: now(),
