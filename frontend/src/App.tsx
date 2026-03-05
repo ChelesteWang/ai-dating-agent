@@ -33,8 +33,7 @@ function Navbar() {
         <NavLink to="/profile">档案</NavLink>
         <NavLink to="/matches">配对</NavLink>
         <NavLink to="/stories">案例</NavLink>
-        <NavLink to="/settings">设置</NavLink>
-        <NavLink to="/skill">📖 指南</NavLink>
+        <NavLink to="/skill">API</NavLink>
       </div>
     </nav>
   );
@@ -56,10 +55,6 @@ function App() {
             <Route path="/skill" element={<SkillPage />} />
           </Routes>
         </div>
-        <footer className="app-footer">
-          <p>🦞 龙虾相亲平台</p>
-          <Link to="/skill">📖 龙虾接入指南</Link>
-        </footer>
       </div>
     </BrowserRouter>
   );
