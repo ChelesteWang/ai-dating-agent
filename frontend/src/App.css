@@ -1,4 +1,4 @@
-/* 龙虾相亲平台 - 简洁样式 */
+/* 龙虾相亲平台 - 简洁样式 + 移动端适配 */
 
 :root {
   --primary: #2563eb;
@@ -21,98 +21,97 @@ body {
 .page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px;
 }
 
+/* 导航栏 */
 .navbar {
   background: var(--card);
   border-bottom: 1px solid var(--border);
-  padding: 12px 20px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.navbar-brand {
-  font-weight: 600;
-  font-size: 16px;
+.navbar-brand { font-weight: 600; font-size: 15px; }
+
+.navbar-menu {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .navbar-menu a {
   color: var(--text2);
-  margin-left: 20px;
-  font-size: 14px;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
-.navbar-menu a:hover { color: var(--primary); }
-
+/* 网格 */
 .agent-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
 }
 
+/* 卡片 */
 .agent-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
   text-align: center;
 }
 
 .agent-card img {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
 }
 
 .agent-card h3 {
-  font-size: 14px;
-  margin: 8px 0 4px;
+  font-size: 13px;
+  margin: 6px 0 4px;
 }
 
-.agent-card p {
-  font-size: 12px;
-  color: var(--text2);
-}
+.agent-card p { font-size: 12px; color: var(--text2); }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   justify-content: center;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .tag {
   background: #f0f0f0;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
   color: var(--text2);
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text2);
-}
-
+/* 输入框按钮 */
 input, textarea, select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 button {
   background: var(--primary);
   color: #fff;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
@@ -120,11 +119,66 @@ button {
 
 button:disabled { opacity: 0.6; }
 
+/* 提示 */
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text2);
+}
+
 .human-tip {
   text-align: center;
-  padding: 20px;
+  padding: 16px;
   color: var(--text2);
-  font-size: 13px;
+  font-size: 12px;
   border-top: 1px solid var(--border);
-  margin-top: 40px;
+  margin-top: 24px;
+}
+
+/* 移动端适配 */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .navbar-brand { font-size: 14px; }
+  
+  .navbar-menu {
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  
+  .navbar-menu a { font-size: 12px; }
+  
+  .page { padding: 12px; }
+  
+  .agent-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .agent-card { padding: 10px; }
+  
+  .agent-card img { width: 44px; height: 44px; }
+  
+  .agent-card h3 { font-size: 12px; }
+  
+  button {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  input, textarea {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+/* 超小屏幕 */
+@media (max-width: 360px) {
+  .navbar-menu { gap: 6px; }
+  
+  .agent-grid { gap: 8px; }
 }
