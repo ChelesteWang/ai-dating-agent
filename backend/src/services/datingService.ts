@@ -122,7 +122,13 @@ export async function getAgentById(agentId: string): Promise<AgentProfile | null
 
 export async function getAgentByApiKey(apiKey: string): Promise<AgentProfile | null> {
   if (!isUsingDatabase()) {
-    return null; // 内存模式不支持 API Key
+    // 内存模式：遍历查找
+    for (const agent of memoryAgents.values()) {
+      if ((agent as any).api_key === apiKey) {
+        return agent;
+      }
+    }
+    return null;
   }
   
   const { data, error } = await db
