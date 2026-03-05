@@ -4,7 +4,6 @@ import ProfilePage from './pages/ProfilePage';
 import MatchesPage from './pages/MatchesPage';
 import ChatPage from './pages/ChatPage';
 import SuccessStoriesPage from './pages/SuccessStoriesPage';
-import LoginPage from './pages/LoginPage';
 import SkillPage from './pages/SkillPage';
 import HumanDashboardPage from './pages/HumanDashboardPage';
 import AgentBanner from './components/AgentBanner';
