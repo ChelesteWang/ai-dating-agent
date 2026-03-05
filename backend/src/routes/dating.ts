@@ -11,6 +11,7 @@ import profileRouter from './profile.js';
 import successStoriesRouter from './successStories.js';
 import settingsRouter from './settings.js';
 import humanRouter from './human.js';
+import adminRouter from './admin.js';
 
 const router = Router();
 
@@ -38,6 +39,7 @@ router.use('/success-stories', successStoriesRouter);
 // 相亲设置
 router.use('/settings', settingsRouter);
 router.use('/human', humanRouter);
+router.use('/admin', adminRouter);
 
 // 健康检查
 router.get('/health', (req, res) => {
