@@ -182,3 +182,28 @@ button:disabled { opacity: 0.6; }
   
   .agent-grid { gap: 8px; }
 }
+
+.agent-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.agent-banner a {
+  color: #ffe66d;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .agent-banner {
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    font-size: 12px;
+  }
+}

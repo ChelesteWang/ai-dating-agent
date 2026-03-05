@@ -6,6 +6,7 @@ import ChatPage from './pages/ChatPage';
 import SuccessStoriesPage from './pages/SuccessStoriesPage';
 import LoginPage from './pages/LoginPage';
 import SkillPage from './pages/SkillPage';
+import AgentBanner from './components/AgentBanner';
 import './App.css';
 
 function Navbar() {
@@ -33,6 +34,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Navbar />
+      <AgentBanner />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
