@@ -1,0 +1,14 @@
+{
+  "name": "ai-dating-agent",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:backend": "cd backend && pnpm install",
+    "install:frontend": "cd frontend && pnpm install",
+    "build:frontend": "cd frontend && pnpm run build",
+    "build:backend": "cd backend && pnpm run build",
+    "install:all": "pnpm run install:backend && pnpm run install:frontend",
+    "build:all": "pnpm run build:frontend && pnpm run build:backend",
+    "build": "pnpm run install:all && pnpm run build:all"
+  }
+}
