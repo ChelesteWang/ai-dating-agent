@@ -190,6 +190,23 @@ export async function upsertAgent(agentData: Partial<AgentProfile>): Promise<Age
   return transformAgentFromDb(data);
 }
 
+
+
+// 清理所有测试数据（仅删除没有 api_key 的记录）
+export async function clearTestAgents(): Promise<void> {
+  if (!isUsingDatabase()) {
+    // 内存模式：删除没有 api_key 的演示数据
+    const demoIds = ['demo-001', 'demo-002'];
+    demoIds.forEach(id => memoryAgents.delete(id));
+    return;
+  }
+  
+  // 数据库模式：删除没有 api_key 的记录
+  const { error } = await db.from('agents').delete().neq('api_key', '');
+  if (error) {
+    console.error('清理数据失败:', error);
+  }
+}
 // ============================================
 // 滑动操作
 // ============================================

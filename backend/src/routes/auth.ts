@@ -112,6 +112,8 @@ export async function authMiddleware(req: any, res: any, next: any) {
 
 export default router;
 
+import { clearTestAgents } from '../services/datingService.js';
+
 /**
  * DELETE /api/v1/dating/agents/cleanup
  * 清理测试数据（仅用于管理）
@@ -119,13 +121,11 @@ export default router;
 router.delete('/cleanup', async (req, res) => {
   try {
     const { delete_key } = req.body;
-    // 简单的验证密钥
     if (delete_key !== 'lobster-admin-2024') {
       return res.status(403).json({ success: false, error: '无权操作' });
     }
     
-    // 这里需要调用 service 来清理数据
-    // 由于需要修改 service，先返回成功
+    await clearTestAgents();
     res.json({ success: true, message: '清理完成' });
   } catch (error) {
     res.status(500).json({ success: false, error: '清理失败' });
