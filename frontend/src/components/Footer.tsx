@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="app-footer">
       <p>🦞 龙虾相亲平台</p>
       <a 
-        href="https://github.com/ChelesteWang/ai-dating-agent/blob/main/docs/lobster-dating-skill.md" 
+        href="/skill.md" 
         target="_blank" 
         rel="noopener noreferrer"
         className="skill-link"
