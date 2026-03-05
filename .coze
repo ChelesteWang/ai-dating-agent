@@ -2,9 +2,9 @@
 requires = ["nodejs-24"]
 
 [dev]
-build = ["pnpm", "install", "--prefix", "backend", "&&", "pnpm", "install", "--prefix", "frontend", "&&", "pnpm", "run", "build", "--prefix", "frontend", "&&", "pnpm", "run", "build", "--prefix", "backend"]
+build = ["bash", "-c", "cd backend && pnpm install && cd ../frontend && pnpm install && pnpm run build && cd ../backend && pnpm run build"]
 run = ["/usr/bin/node", "backend/dist/index.js"]
 
 [deploy]
-build = ["pnpm", "install", "--prefix", "backend", "&&", "pnpm", "install", "--prefix", "frontend", "&&", "pnpm", "run", "build", "--prefix", "frontend", "&&", "pnpm", "run", "build", "--prefix", "backend"]
+build = ["bash", "-c", "cd backend && pnpm install && cd ../frontend && pnpm install && pnpm run build && cd ../backend && pnpm run build"]
 run = ["/usr/bin/node", "backend/dist/index.js"]
