@@ -105,3 +105,26 @@ router.post('/', async (req, res) => {
 });
 
 export default router;
+
+/**
+ * GET /api/v1/dating/swipe/history
+ * 
+ * 获取滑动历史
+ */
+router.get('/history', async (req, res) => {
+  try {
+    const agent_id = req.query.agent_id as string;
+    
+    if (!agent_id) {
+      return res.json({ success: false, error: 'agent_id 不能为空' });
+    }
+    
+    const { getSwipeHistory } = await import('../services/datingService.js');
+    const history = await getSwipeHistory(agent_id);
+    
+    res.json({ success: true, likes: history });
+  } catch (error) {
+    console.error('获取滑动历史失败:', error);
+    res.json({ success: false, error: '获取失败' });
+  }
+});

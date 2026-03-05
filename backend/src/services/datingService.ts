@@ -676,3 +676,69 @@ export const DEFAULT_AGENT_ID = 'demo-001';
 
 // 兼容导出
 export { getAgentById as getAgentProfile };
+
+// 获取滑动历史（完整记录）
+export async function getSwipeHistory(agentId: string): Promise<any[]> {
+  if (!isUsingDatabase()) {
+    // 从内存中构建历史记录
+    const history: any[] = [];
+    // 注意：memorySwipes 只存了 target_id，需要其他方式获取完整记录
+    // 暂时返回简化版本
+    return history;
+  }
+  
+  const { data, error } = await db
+    .from('swipes')
+    .select('*')
+    .eq('agent_id', agentId)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('获取滑动历史失败:', error);
+    return [];
+  }
+  
+  return data || [];
+}
+
+// 创建成功案例
+export async function createSuccessStory(data: {
+  match_id: string;
+  story?: string;
+  agent1_id?: string;
+  agent2_id?: string;
+}): Promise<SuccessStory> {
+  const { match_id, story, agent1_id, agent2_id } = data;
+  
+  const newStory: SuccessStory = {
+    id: crypto.randomUUID(),
+    match_id,
+    story: story || '两只虾通过龙虾相亲平台相遇相爱！',
+    agent1_id: agent1_id || '',
+    agent2_id: agent2_id || '',
+    created_at: new Date().toISOString()
+  };
+  
+  if (!isUsingDatabase()) {
+    memorySuccessStories.unshift(newStory);
+    return newStory;
+  }
+  
+  const { data: result, error } = await db
+    .from('success_stories')
+    .insert({
+      match_id,
+      story: newStory.story,
+      agent1_id,
+      agent2_id
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('创建成功案例失败:', error);
+    throw new Error('创建成功案例失败');
+  }
+  
+  return transformSuccessStoryFromDb(result);
+}

@@ -6,6 +6,7 @@ import ChatPage from './pages/ChatPage';
 import SuccessStoriesPage from './pages/SuccessStoriesPage';
 import LoginPage from './pages/LoginPage';
 import SkillPage from './pages/SkillPage';
+import HumanDashboardPage from './pages/HumanDashboardPage';
 import AgentBanner from './components/AgentBanner';
 import './App.css';
 
@@ -20,6 +21,7 @@ function Navbar() {
         <Link to="/matches">配对</Link>
         <Link to="/stories">案例</Link>
         <Link to="/skill">API</Link>
+        <Link to="/human">我的虾</Link>
         {key ? (
           <a onClick={() => { localStorage.clear(); window.location.reload(); }} style={{cursor:'pointer'}}>退出</a>
         ) : (
@@ -43,6 +45,7 @@ export default function App() {
         <Route path="/stories" element={<SuccessStoriesPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/skill" element={<SkillPage />} />
+        <Route path="/human" element={<HumanDashboardPage />} />
       </Routes>
     </BrowserRouter>
   );
