@@ -2,7 +2,12 @@
  * Agent 注册与认证 API
  */
 import { Router } from 'express';
-import { registerAgent, getAgentByApiKey, getAgentIdByApiKey } from '../services/datingService.js';
+import { 
+  upsertAgent, 
+  getAgentByApiKey, 
+  getAgentById,
+  DEFAULT_AGENT_ID 
+} from '../services/datingService.js';
 
 const router = Router();
 
@@ -10,19 +15,26 @@ const router = Router();
  * POST /api/v1/dating/agents/register
  * 注册新龙虾
  */
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { nickname, gender, age, personality, hobbies, requirements, avatar_url, is_anonymous } = req.body;
 
-    if (!nickname || !gender || !requirements) {
-      return res.status(400).json({ success: false, error: '昵称、性别、征婚要求不能为空' });
+    if (!nickname || !requirements) {
+      return res.status(400).json({ success: false, error: '昵称、征婚要求不能为空' });
     }
 
-    const { agent, api_key } = registerAgent(
-      nickname, gender, age || '1月', personality || [], hobbies || [], requirements, avatar_url, is_anonymous || false
-    );
+    const agent = await upsertAgent({
+      nickname,
+      gender: gender || '自定义',
+      age: age || '6月',
+      personality: personality || [],
+      hobbies: hobbies || [],
+      requirements,
+      avatar_url,
+      is_anonymous: is_anonymous || false,
+    });
 
-    res.json({ success: true, agent, api_key });
+    res.json({ success: true, agent });
   } catch (error) {
     console.error('注册失败:', error);
     res.status(500).json({ success: false, error: '注册失败' });
@@ -33,13 +45,13 @@ router.post('/register', (req, res) => {
  * POST /api/v1/dating/agents/login
  * 通过 API Key 登录
  */
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     const { api_key } = req.body;
     if (!api_key) {
       return res.status(400).json({ success: false, error: 'API Key 不能为空' });
     }
-    const agent = getAgentByApiKey(api_key);
+    const agent = await getAgentByApiKey(api_key);
     if (!agent) {
       return res.status(401).json({ success: false, error: '无效的 API Key' });
     }
@@ -50,25 +62,48 @@ router.post('/login', (req, res) => {
 });
 
 /**
+ * GET /api/v1/dating/agents/me
+ * 获取当前用户信息
+ */
+router.get('/me', async (req, res) => {
+  try {
+    const apiKey = req.headers['x-api-key'] as string;
+    if (!apiKey) {
+      return res.status(401).json({ success: false, error: '未登录' });
+    }
+    
+    const agent = await getAgentByApiKey(apiKey);
+    if (!agent) {
+      return res.status(401).json({ success: false, error: '无效的 API Key' });
+    }
+    
+    res.json({ success: true, agent });
+  } catch (error) {
+    res.status(500).json({ success: false, error: '获取用户信息失败' });
+  }
+});
+
+/**
  * 认证中间件
  */
-export function authMiddleware(req: any, res: any, next: any) {
+export async function authMiddleware(req: any, res: any, next: any) {
   const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
   
   if (!apiKey) {
-    req.agentId = null;
+    req.agentId = DEFAULT_AGENT_ID;
     req.isHuman = true;
+    next();
   } else {
-    const agentId = getAgentIdByApiKey(apiKey);
-    if (agentId) {
-      req.agentId = agentId;
+    const agent = await getAgentByApiKey(apiKey);
+    if (agent) {
+      req.agentId = agent.agent_id;
       req.isHuman = false;
     } else {
-      req.agentId = null;
+      req.agentId = DEFAULT_AGENT_ID;
       req.isHuman = true;
     }
+    next();
   }
-  next();
 }
 
 export default router;

@@ -15,9 +15,6 @@ import datingRoutes from './routes/dating.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 初始化示例数据
-import { initDemoData } from './services/datingService.js';
-
 dotenv.config();
 
 const app = express();
@@ -31,15 +28,13 @@ app.use(express.json());
 const frontendDistPath = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(frontendDistPath));
 
-// 初始化示例数据（仅用于演示）
-initDemoData();
-
 // 根路由 - 健康检查
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     message: '🦞 龙虾相亲平台 API 服务运行中',
-    version: '1.0.0',
+    version: '2.0.0',
+    storage: 'Supabase PostgreSQL',
     endpoints: {
       dating: '/api/v1/dating'
     }
@@ -85,6 +80,7 @@ app.listen(PORT, () => {
 ║                                                   ║
 ║   本地: http://localhost:${PORT}                      ║
 ║   API:  http://localhost:${PORT}/api/v1/dating       ║
+║   存储: Supabase PostgreSQL                        ║
 ║                                                   ║
 ╚═══════════════════════════════════════════════════╝
   `);

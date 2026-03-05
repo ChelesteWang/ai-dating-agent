@@ -5,21 +5,18 @@
  * GET /api/v1/dating/messages/:match_id/topic
  */
 import { Router } from 'express';
-import { getMessages, sendMessage, generateOpeningTopic } from '../services/datingService.js';
-import { authMiddleware } from './auth.js';
+import { getMessagesForMatch, sendMessage, getMatchById } from '../services/datingService.js';
 
 const router = Router();
 
-router.use(authMiddleware);
-
 /**
  * GET /api/v1/dating/messages/:match_id
- * 获取聊天消息（公开）
+ * 获取聊天消息
  */
-router.get('/:match_id', (req, res) => {
+router.get('/:match_id', async (req, res) => {
   try {
     const { match_id } = req.params;
-    const messages = getMessages(match_id);
+    const messages = await getMessagesForMatch(match_id);
     res.json({ messages });
   } catch (error) {
     console.error('获取消息失败:', error);
@@ -29,24 +26,23 @@ router.get('/:match_id', (req, res) => {
 
 /**
  * POST /api/v1/dating/messages/:match_id
- * 发送消息（仅 Agent 可用）
+ * 发送消息
  */
-router.post('/:match_id', (req: any, res) => {
-  // 人类不能发送消息
-  if (req.isHuman) {
-    return res.status(403).json({ success: false, error: '人类用户无权发送消息' });
-  }
-  
+router.post('/:match_id', async (req, res) => {
   try {
     const { match_id } = req.params;
-    const { content } = req.body;
-    const senderId = req.body.agent_id || req.agentId;
+    const { content, agent_id } = req.body;
     
     if (!content) {
       return res.status(400).json({ success: false, error: '消息内容不能为空' });
     }
     
-    const message = sendMessage(match_id, senderId, content);
+    const senderId = agent_id;
+    if (!senderId) {
+      return res.status(400).json({ success: false, error: '缺少发送者 ID' });
+    }
+    
+    const message = await sendMessage(match_id, senderId, content);
     res.json({ message });
   } catch (error: any) {
     console.error('发送消息失败:', error);
@@ -58,10 +54,26 @@ router.post('/:match_id', (req: any, res) => {
  * GET /api/v1/dating/messages/:match_id/topic
  * AI 生成开场话题
  */
-router.get('/:match_id/topic', (req, res) => {
+router.get('/:match_id/topic', async (req, res) => {
   try {
     const { match_id } = req.params;
-    const topic = generateOpeningTopic(match_id);
+    
+    // 获取配对信息
+    const match = await getMatchById(match_id);
+    if (!match) {
+      return res.status(404).json({ success: false, error: '配对不存在' });
+    }
+    
+    // 生成简单话题（可以接入 AI 生成）
+    const topics = [
+      '你们都喜欢编程，可以聊聊最近在学什么新技术？',
+      '你们都热爱旅行，可以分享最难忘的旅行经历！',
+      '你们都爱听音乐，可以交换一下彼此的播放列表~',
+      '你们性格互补，可以聊聊各自的生活态度！',
+      '你们都有有趣的爱好，不如互相介绍一下？',
+    ];
+    const topic = topics[Math.floor(Math.random() * topics.length)];
+    
     res.json({ topic });
   } catch (error) {
     console.error('生成话题失败:', error);

@@ -1,11 +1,10 @@
 /**
- * 相亲设置 API（只读）
+ * 相亲设置 API
  * GET /api/v1/dating/settings
- * 
- * 仅提供查询功能，不开放编辑
+ * POST /api/v1/dating/settings
  */
 import { Router } from 'express';
-import { getDatingSettings, DEFAULT_AGENT_ID } from '../services/datingService.js';
+import { getSettings, updateSettings, DEFAULT_AGENT_ID } from '../services/datingService.js';
 
 const router = Router();
 
@@ -13,17 +12,12 @@ const router = Router();
  * GET /api/v1/dating/settings
  * 
  * Query Parameters:
- * - agent_id: Agent ID (可选，默认演示账户)
- * 
- * Response:
- * {
- *   "settings": { ... }
- * }
+ * - agent_id: Agent ID (可选)
  */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const agentId = req.query.agent_id as string || DEFAULT_AGENT_ID;
-    const settings = getDatingSettings(agentId);
+    const settings = await getSettings(agentId);
     
     res.json({ settings });
   } catch (error) {
@@ -31,6 +25,26 @@ router.get('/', (req, res) => {
     res.status(500).json({
       success: false,
       error: '获取设置失败'
+    });
+  }
+});
+
+/**
+ * POST /api/v1/dating/settings
+ * 更新设置
+ */
+router.post('/', async (req, res) => {
+  try {
+    const updates = req.body;
+    const agentId = updates.agent_id || DEFAULT_AGENT_ID;
+    
+    const settings = await updateSettings(agentId, updates);
+    res.json({ settings });
+  } catch (error) {
+    console.error('更新设置失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '更新设置失败'
     });
   }
 });

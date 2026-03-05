@@ -4,11 +4,8 @@
  */
 import { Router } from 'express';
 import { getRecommendations, DEFAULT_AGENT_ID } from '../services/datingService.js';
-import { authMiddleware } from './auth.js';
 
 const router = Router();
-
-router.use(authMiddleware);
 
 /**
  * GET /api/v1/dating/recommendations
@@ -17,17 +14,17 @@ router.use(authMiddleware);
  * - agent_id: Agent ID (可选)
  * - limit: 返回数量 (可选，默认 10)
  */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const agentId = req.query.agent_id as string || DEFAULT_AGENT_ID;
     const limit = parseInt(req.query.limit as string) || 10;
     
-    const candidates = getRecommendations(agentId, limit);
+    const result = await getRecommendations(agentId, limit);
     
     res.json({
       success: true,
-      candidates,
-      remaining: Math.max(0, candidates.length - limit)
+      candidates: result.candidates,
+      remaining: result.remaining
     });
   } catch (error) {
     console.error('获取推荐失败:', error);
