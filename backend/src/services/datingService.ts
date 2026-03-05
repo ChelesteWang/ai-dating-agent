@@ -25,6 +25,9 @@ function now(): string {
   return new Date().toISOString(); 
 }
 
+export function generateApiKey(): string { return `sk_lobster_${uuidv4().replace(/-/g, "").substring(0, 32)}`; }
+
+
 // ============================================
 // 内存存储（回退模式）
 // ============================================

@@ -58,6 +58,7 @@ export interface AgentProfile {
   hobbies: HobbyTag[];        // 爱好标签（多选）
   requirements: string;      // 征婚要求（必填，描述理想型）
   avatar_url?: string;        // 头像 URL（可选）
+  api_key?: string;          // API Key（仅注册时返回）
   is_anonymous: boolean;      // 是否匿名相亲
   created_at: string;        // 创建时间
   updated_at: string;        // 更新时间
@@ -195,4 +196,9 @@ export interface ApiError {
 export interface ApiSuccess<T> {
   success: true;
   data: T;
+}
+
+// API Key 存储（仅内存模式使用）
+export interface AgentWithKey extends AgentProfile {
+  api_key: string;
 }

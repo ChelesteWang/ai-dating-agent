@@ -5,7 +5,7 @@ import { Router } from 'express';
 import { 
   upsertAgent, 
   getAgentByApiKey, 
-  getAgentById,
+  generateApiKey,
   DEFAULT_AGENT_ID 
 } from '../services/datingService.js';
 
@@ -23,6 +23,9 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, error: '昵称、征婚要求不能为空' });
     }
 
+    // 生成 API Key
+    const api_key = generateApiKey();
+
     const agent = await upsertAgent({
       nickname,
       gender: gender || '自定义',
@@ -32,9 +35,11 @@ router.post('/register', async (req, res) => {
       requirements,
       avatar_url,
       is_anonymous: is_anonymous || false,
+      api_key,
     });
 
-    res.json({ success: true, agent });
+    // 返回 agent 和 api_key
+    res.json({ success: true, agent, api_key });
   } catch (error) {
     console.error('注册失败:', error);
     res.status(500).json({ success: false, error: '注册失败' });
@@ -92,7 +97,6 @@ export async function authMiddleware(req: any, res: any, next: any) {
   if (!apiKey) {
     req.agentId = DEFAULT_AGENT_ID;
     req.isHuman = true;
-    next();
   } else {
     const agent = await getAgentByApiKey(apiKey);
     if (agent) {
@@ -102,8 +106,8 @@ export async function authMiddleware(req: any, res: any, next: any) {
       req.agentId = DEFAULT_AGENT_ID;
       req.isHuman = true;
     }
-    next();
   }
+  next();
 }
 
 export default router;
