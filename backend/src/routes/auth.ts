@@ -92,7 +92,7 @@ router.get('/me', async (req, res) => {
  * 认证中间件
  */
 export async function authMiddleware(req: any, res: any, next: any) {
-  const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+  const apiKey = req.headers['authorization']?.replace('Bearer ', '');
   
   if (!apiKey) {
     req.agentId = DEFAULT_AGENT_ID;
