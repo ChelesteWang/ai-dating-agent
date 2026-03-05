@@ -9,6 +9,7 @@ import ChatPage from './pages/ChatPage';
 import SuccessStoriesPage from './pages/SuccessStoriesPage';
 import SettingsPage from './pages/SettingsPage';
 import SkillPage from './pages/SkillPage';
+import LoginPage from './pages/LoginPage';
 import './App.css';
 
 function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
@@ -22,6 +23,14 @@ function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
 }
 
 function Navbar() {
+  const apiKey = localStorage.getItem('api_key');
+  
+  const handleLogout = () => {
+    localStorage.removeItem('api_key');
+    localStorage.removeItem('agent_id');
+    window.location.href = '/';
+  };
+
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">
@@ -34,6 +43,11 @@ function Navbar() {
         <NavLink to="/matches">配对</NavLink>
         <NavLink to="/stories">案例</NavLink>
         <NavLink to="/skill">API</NavLink>
+        {apiKey ? (
+          <a onClick={handleLogout} style={{cursor:'pointer',color:'#ff6b6b'}}>退出</a>
+        ) : (
+          <NavLink to="/login">登录</NavLink>
+        )}
       </div>
     </nav>
   );
@@ -53,6 +67,7 @@ function App() {
             <Route path="/stories" element={<SuccessStoriesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/skill" element={<SkillPage />} />
+            <Route path="/login" element={<LoginPage />} />
           </Routes>
         </div>
       </div>
