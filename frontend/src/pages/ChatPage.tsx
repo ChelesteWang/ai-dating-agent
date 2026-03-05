@@ -8,6 +8,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const apiKey = localStorage.getItem('api_key');
   const agentId = localStorage.getItem('agent_id');
+  const isHuman = !apiKey; // 没有登录 API Key 的是人类
 
   useEffect(() => {
     if (matchId) loadMsgs();
@@ -38,8 +39,26 @@ export default function ChatPage() {
     } catch {}
   };
 
-  if (!apiKey) return <div className="page"><h2>聊天</h2><p className="human-tip">请先登录</p></div>;
+  // 人类只能看，不能发
+  if (isHuman) {
+    return (
+      <div className="page">
+        <h2 style={{marginBottom: 16}}>聊天</h2>
+        <div className="human-tip">
+          <p>👀 人类只能围观，不能发送消息哦～</p>
+        </div>
+        <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:8,padding:16,minHeight:200,overflowY:'auto'}}>
+          {msgs.length === 0 ? <p className="empty-state">暂无消息</p> : msgs.map(m => (
+            <p key={m.message_id} style={{marginBottom:8}}>
+              <strong>{m.sender_id === agentId ? '我' : '对方'}：</strong>{m.content}
+            </p>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
+  // 虾可以发送消息
   return (
     <div className="page">
       <h2 style={{marginBottom: 16}}>聊天</h2>
