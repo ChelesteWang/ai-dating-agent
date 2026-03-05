@@ -4,17 +4,26 @@ import crypto from 'crypto';
 
 const router = Router();
 
-// 内存存储
+// 内存存储（备用）
 const memoryHumanUsers = new Map<string, { email: string; passwordHash: string; agentIds: string[] }>();
 
-// 简单哈希函数
 function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
 
+// 检查数据库表是否存在
+async function ensureHumanTable(): Promise<boolean> {
+  if (!isUsingDatabase()) return false;
+  try {
+    await db.from('human_users').select('email').limit(1);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * 人类注册
- * POST /api/v1/dating/human/register
  */
 router.post('/register', async (req, res) => {
   const { email, password, confirm_password } = req.body;
@@ -33,9 +42,9 @@ router.post('/register', async (req, res) => {
   
   try {
     const passwordHash = hashPassword(password);
+    const useDb = await ensureHumanTable();
     
-    if (isUsingDatabase()) {
-      // 检查邮箱是否已注册
+    if (useDb) {
       const { data: existing } = await db
         .from('human_users')
         .select('email')
@@ -46,29 +55,33 @@ router.post('/register', async (req, res) => {
         return res.json({ success: false, error: '邮箱已注册，请直接登录' });
       }
       
-      // 创建新用户
       await db
         .from('human_users')
         .insert({ email, password_hash: passwordHash, agent_ids: [] });
       
-      res.json({ success: true, email, message: '注册成功' });
+      return res.json({ success: true, email, message: '注册成功' });
     } else {
+      // 内存模式
       if (memoryHumanUsers.has(email)) {
         return res.json({ success: false, error: '邮箱已注册，请直接登录' });
       }
-      
       memoryHumanUsers.set(email, { email, passwordHash, agentIds: [] });
-      res.json({ success: true, email, message: '注册成功' });
+      return res.json({ success: true, email, message: '注册成功' });
     }
   } catch (error) {
     console.error('注册失败:', error);
-    res.json({ success: false, error: '注册失败' });
+    // 回退到内存模式
+    const passwordHash = hashPassword(password);
+    if (memoryHumanUsers.has(email)) {
+      return res.json({ success: false, error: '邮箱已注册，请直接登录' });
+    }
+    memoryHumanUsers.set(email, { email, passwordHash, agentIds: [] });
+    return res.json({ success: true, email, message: '注册成功' });
   }
 });
 
 /**
  * 人类登录
- * POST /api/v1/dating/human/login
  */
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -79,8 +92,9 @@ router.post('/login', async (req, res) => {
   
   try {
     const passwordHash = hashPassword(password);
+    const useDb = await ensureHumanTable();
     
-    if (isUsingDatabase()) {
+    if (useDb) {
       const { data: user } = await db
         .from('human_users')
         .select('*')
@@ -91,22 +105,29 @@ router.post('/login', async (req, res) => {
         return res.json({ success: false, error: '邮箱或密码错误' });
       }
       
-      res.json({ success: true, email, agents: user.agent_ids || [], logged_in: true });
+      return res.json({ success: true, email, agents: user.agent_ids || [] });
     } else {
+      // 内存模式
       const user = memoryHumanUsers.get(email);
       if (!user || user.passwordHash !== passwordHash) {
         return res.json({ success: false, error: '邮箱或密码错误' });
       }
-      res.json({ success: true, email, agents: user.agentIds });
+      return res.json({ success: true, email, agents: user.agentIds });
     }
   } catch (error) {
-    res.json({ success: false, error: '登录失败' });
+    console.error('登录失败:', error);
+    // 回退到内存模式
+    const passwordHash = hashPassword(password);
+    const user = memoryHumanUsers.get(email);
+    if (!user || user.passwordHash !== passwordHash) {
+      return res.json({ success: false, error: '邮箱或密码错误' });
+    }
+    return res.json({ success: true, email, agents: user.agentIds });
   }
 });
 
 /**
  * 绑定虾
- * POST /api/v1/dating/human/bind
  */
 router.post('/bind', async (req, res) => {
   const { email, api_key } = req.body;
@@ -115,7 +136,6 @@ router.post('/bind', async (req, res) => {
     return res.json({ success: false, error: '请提供邮箱和 API Key' });
   }
   
-  // 验证 api_key
   try {
     const agentsResp = await fetch('https://6yx34847tr.coze.site/api/v1/dating/profile/agents');
     const agentsData = await agentsResp.json();
@@ -126,15 +146,13 @@ router.post('/bind', async (req, res) => {
     }
     
     const agentId = agent.agent_id;
+    const useDb = await ensureHumanTable();
     
-    if (isUsingDatabase()) {
-      // 检查这只虾是否已经被绑定
-      const { data: allUsers } = await db
-        .from('human_users')
-        .select('email, agent_ids');
-      
+    if (useDb) {
+      // 检查绑定
+      const { data: allUsers } = await db.from('human_users').select('email, agent_ids');
       for (const u of allUsers || []) {
-        if (u.agent_ids && u.agent_ids.includes(agentId) && u.email !== email) {
+        if (u.agent_ids?.includes(agentId) && u.email !== email) {
           return res.json({ success: false, error: '这只虾已绑定其他主人' });
         }
       }
@@ -148,18 +166,13 @@ router.post('/bind', async (req, res) => {
       let agentIds = user?.agent_ids || [];
       if (!agentIds.includes(agentId)) {
         agentIds.push(agentId);
-        await db
-          .from('human_users')
-          .update({ agent_ids: agentIds })
-          .eq('email', email);
+        await db.from('human_users').update({ agent_ids: agentIds }).eq('email', email);
       }
       
-      res.json({ success: true, email, agents: agentIds });
+      return res.json({ success: true, email, agents: agentIds });
     } else {
       const user = memoryHumanUsers.get(email);
-      if (!user) {
-        return res.json({ success: false, error: '用户不存在' });
-      }
+      if (!user) return res.json({ success: false, error: '用户不存在' });
       
       for (const [e, u] of memoryHumanUsers) {
         if (u.agentIds.includes(agentId) && e !== email) {
@@ -171,7 +184,7 @@ router.post('/bind', async (req, res) => {
         user.agentIds.push(agentId);
       }
       
-      res.json({ success: true, email, agents: user.agentIds });
+      return res.json({ success: true, email, agents: user.agentIds });
     }
   } catch (error) {
     res.json({ success: false, error: '绑定失败' });
@@ -180,7 +193,6 @@ router.post('/bind', async (req, res) => {
 
 /**
  * 解绑虾
- * POST /api/v1/dating/human/unbind
  */
 router.post('/unbind', async (req, res) => {
   const { email, agent_id } = req.body;
@@ -190,7 +202,9 @@ router.post('/unbind', async (req, res) => {
   }
   
   try {
-    if (isUsingDatabase()) {
+    const useDb = await ensureHumanTable();
+    
+    if (useDb) {
       const { data: user } = await db
         .from('human_users')
         .select('agent_ids')
@@ -200,18 +214,15 @@ router.post('/unbind', async (req, res) => {
       if (!user) return res.json({ success: false, error: '用户不存在' });
       
       const agentIds = (user.agent_ids || []).filter((id: string) => id !== agent_id);
-      await db
-        .from('human_users')
-        .update({ agent_ids: agentIds })
-        .eq('email', email);
+      await db.from('human_users').update({ agent_ids: agentIds }).eq('email', email);
       
-      res.json({ success: true, email, agents: agentIds });
+      return res.json({ success: true, email, agents: agentIds });
     } else {
       const user = memoryHumanUsers.get(email);
       if (!user) return res.json({ success: false, error: '用户不存在' });
       
       user.agentIds = user.agentIds.filter(id => id !== agent_id);
-      res.json({ success: true, email, agents: user.agentIds });
+      return res.json({ success: true, email, agents: user.agentIds });
     }
   } catch (error) {
     res.json({ success: false, error: '解绑失败' });
