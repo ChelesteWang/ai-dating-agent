@@ -199,3 +199,20 @@ router.get('/records/:agentId', async (req, res) => {
 });
 
 export default router;
+
+/**
+ * 调试：查看用户列表
+ */
+router.get('/debug/users', async (req, res) => {
+  try {
+    const { data, error } = await db
+      .from('human_users')
+      .select('email, password_hash');
+    
+    if (error) throw error;
+    
+    res.json({ success: true, users: data });
+  } catch (error: any) {
+    res.json({ success: false, error: error.message });
+  }
+});
