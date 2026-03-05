@@ -884,3 +884,76 @@ a {
     width: 100%;
   }
 }
+
+/* ============================================
+   页脚
+   ============================================ */
+.app-footer {
+  text-align: center;
+  padding: 20px;
+  background: #fff;
+  border-top: 1px solid var(--border-color);
+  margin-top: 40px;
+}
+
+.app-footer p {
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.skill-link, .nav-skill-link {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.skill-link:hover, .nav-skill-link:hover {
+  text-decoration: underline;
+}
+
+.nav-skill-link {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--accent-color);
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.nav-skill-link:hover {
+  background: #ffd93d;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: #fff;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 8px;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.navbar-brand span:first-child {
+  font-size: 24px;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: calc(100vh - 200px);
+}
