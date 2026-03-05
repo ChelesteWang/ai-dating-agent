@@ -12,6 +12,8 @@ import datingRoutes from './routes/dating.js';
 // ES 模块中获取 __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// 初始化示例数据
+import { initDemoData } from './services/datingService.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +23,8 @@ app.use(express.json());
 // 静态文件服务 - 提供前端页面
 const frontendDistPath = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(frontendDistPath));
+// 初始化示例数据（仅用于演示）
+initDemoData();
 // 根路由 - 健康检查
 app.get('/api/health', (req, res) => {
     res.json({
