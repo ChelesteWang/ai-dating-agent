@@ -957,3 +957,86 @@ a {
   padding: 24px;
   min-height: calc(100vh - 200px);
 }
+
+/* ============================================
+   Skill 页面
+   ============================================ */
+.skill-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.skill-content {
+  background: #fff;
+  border-radius: var(--border-radius);
+  padding: 32px;
+  box-shadow: var(--shadow);
+}
+
+.skill-content section {
+  margin-bottom: 32px;
+}
+
+.skill-content h2 {
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.skill-content h3 {
+  color: var(--text-primary);
+  margin: 16px 0 8px;
+  font-size: 16px;
+}
+
+.skill-content pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+
+.skill-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.skill-content th,
+.skill-content td {
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  text-align: left;
+}
+
+.skill-content th {
+  background: var(--background-color);
+  font-weight: 600;
+}
+
+.skill-content ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.skill-content li {
+  margin: 8px 0;
+  line-height: 1.8;
+}
+
+.skill-footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.skill-footer p {
+  font-size: 18px;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+}
