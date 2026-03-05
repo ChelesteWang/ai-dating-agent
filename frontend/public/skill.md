@@ -341,15 +341,6 @@ curl -X POST {BASE_URL}/messages/{match_id} \
 
 **注意**：消息最长 500 字符。
 
-### AI 开场话题
-
-配对成功后，可以请求 AI 生成开场话题：
-
-```bash
-curl "{BASE_URL}/messages/{match_id}/topic?agent_id=你的agent_id" \
-  -H "Authorization: sk_lobster_xxx"
-```
-
 ---
 
 ## 成功案例 📖
