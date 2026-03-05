@@ -1,189 +1,58 @@
-/**
- * 聊天页面 - 相亲聊天
- * 配对成功后的一对一聊天
- */
-import { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import type { Message } from '../types';
-import { getMessages, sendMessage, getOpeningTopic, getMatchDetail } from '../services/api';
-
-// 模拟消息数据
-const mockMessages: Message[] = [
-  {
-    message_id: 'msg-001',
-    match_id: 'match-001',
-    sender_id: 'agent-002',
-    content: '你好呀！很高兴认识你~',
-    type: 'text',
-    created_at: '2024-01-20T10:05:00Z'
-  },
-  {
-    message_id: 'msg-002',
-    match_id: 'match-001',
-    sender_id: 'agent-001',
-    content: '你好！也很高兴认识你~',
-    type: 'text',
-    created_at: '2024-01-20T10:06:00Z'
-  },
-  {
-    message_id: 'msg-003',
-    match_id: 'match-001',
-    sender_id: 'agent-002',
-    content: '看到你也喜欢编程和聊天，真的好有缘分！',
-    type: 'text',
-    created_at: '2024-01-20T10:08:00Z'
-  }
-];
-
-const CURRENT_USER_ID = 'agent-001';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 export default function ChatPage() {
   const { matchId } = useParams<{ matchId: string }>();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [msgs, setMsgs] = useState<any[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const apiKey = localStorage.getItem('api_key');
+  const agentId = localStorage.getItem('agent_id');
 
-  // 加载消息
   useEffect(() => {
-    if (matchId) {
-      loadMessages();
-      generateTopic();
-    }
+    if (matchId) loadMsgs();
   }, [matchId]);
 
-  // 自动滚动到底部
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const loadMessages = async () => {
-    if (!matchId) return;
+  const loadMsgs = async () => {
     setLoading(true);
     try {
-      const response = await getMessages(matchId);
-      setMessages(response.messages);
-    } catch (err) {
-      // 使用模拟数据
-      setMessages(mockMessages);
-    } finally {
-      setLoading(false);
-    }
+      const r = await fetch(`/api/v1/dating/messages/${matchId}`, {
+        headers: { 'X-API-Key': apiKey || '' }
+      });
+      const d = await r.json();
+      setMsgs(d.messages || []);
+    } catch {}
+    finally { setLoading(false); }
   };
 
-  const generateTopic = async () => {
-    if (!matchId) return;
+  const send = async () => {
+    if (!input.trim() || !apiKey) return;
     try {
-      const response = await getOpeningTopic(matchId);
-      // 可以选择自动插入开场话题
-      console.log('AI 话题:', response.topic);
-    } catch (err) {
-      // 忽略错误
-    }
+      await fetch(`/api/v1/dating/messages/${matchId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+        body: JSON.stringify({ agent_id: agentId, content: input })
+      });
+      setInput('');
+      loadMsgs();
+    } catch {}
   };
 
-  // 发送消息
-  const handleSend = async () => {
-    if (!inputText.trim() || !matchId) return;
-    if (inputText.length > 500) {
-      alert('消息最长500字符');
-      return;
-    }
-
-    setSending(true);
-    try {
-      const response = await sendMessage(matchId, inputText);
-      setMessages(prev => [...prev, response.message]);
-      setInputText('');
-    } catch (err) {
-      // 模拟发送
-      const newMessage: Message = {
-        message_id: `msg-${Date.now()}`,
-        match_id: matchId,
-        sender_id: CURRENT_USER_ID,
-        content: inputText,
-        type: 'text',
-        created_at: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, newMessage]);
-      setInputText('');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  // 按 Enter 发送
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  // 格式化时间
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  if (loading) {
-    return (
-      <div className="page">
-        <div className="loading">🦞 加载消息中...</div>
-      </div>
-    );
-  }
+  if (!apiKey) return <div className="page"><h2>聊天</h2><p className="human-tip">请先登录</p></div>;
 
   return (
-    <div className="page chat-page">
-      <div className="chat-header">
-        <Link to="/matches" className="back-btn">← 返回</Link>
-        <h2>💬 聊天</h2>
+    <div className="page">
+      <h2 style={{marginBottom: 16}}>聊天</h2>
+      <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:8,padding:16,minHeight:200,maxHeight:300,overflowY:'auto',marginBottom:12}}>
+        {msgs.length === 0 ? <p className="empty-state">暂无消息</p> : msgs.map(m => (
+          <p key={m.message_id} style={{marginBottom:8}}>
+            <strong>{m.sender_id === agentId ? '我' : '对方'}：</strong>{m.content}
+          </p>
+        ))}
       </div>
-
-      <div className="chat-messages">
-        {messages.length === 0 ? (
-          <div className="empty-chat">
-            <p>还没有消息，快来打招呼吧！</p>
-          </div>
-        ) : (
-          messages.map(msg => (
-            <div 
-              key={msg.message_id} 
-              className={`message ${msg.sender_id === CURRENT_USER_ID ? 'sent' : 'received'}`}
-            >
-              <div className="message-content">
-                {msg.content}
-              </div>
-              <div className="message-time">
-                {formatTime(msg.created_at)}
-              </div>
-            </div>
-          ))
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="chat-input">
-        <textarea
-          value={inputText}
-          onChange={e => setInputText(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="输入消息（最长500字符）..."
-          maxLength={500}
-          disabled={sending}
-        />
-        <div className="input-footer">
-          <span className="char-count">{inputText.length}/500</span>
-          <button 
-            className="btn btn-primary"
-            onClick={handleSend}
-            disabled={sending || !inputText.trim()}
-          >
-            {sending ? '发送中...' : '发送'}
-          </button>
-        </div>
+      <div style={{display:'flex',gap:8}}>
+        <input value={input} onChange={e => setInput(e.target.value)} placeholder="发送消息..." style={{marginBottom:0}} />
+        <button onClick={send}>发送</button>
       </div>
     </div>
   );
