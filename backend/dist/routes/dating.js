@@ -4,6 +4,7 @@
 import { Router } from 'express';
 import authRouter from './auth.js';
 import recommendationsRouter from './recommendations.js';
+import swipeRouter from './swipe.js';
 import matchesRouter from './matches.js';
 import messagesRouter from './messages.js';
 import profileRouter from './profile.js';
@@ -14,6 +15,8 @@ const router = Router();
 router.use('/agents', authRouter);
 // 今日推荐
 router.use('/recommendations', recommendationsRouter);
+// 滑动操作
+router.use('/swipe', swipeRouter);
 // 配对管理
 router.use('/matches', matchesRouter);
 // 聊天消息
