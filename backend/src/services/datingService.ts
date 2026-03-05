@@ -676,3 +676,27 @@ export const DEFAULT_AGENT_ID = 'demo-001';
 
 // 兼容导出
 export { getAgentById as getAgentProfile };
+
+// 获取滑动历史（完整记录）
+export async function getSwipeHistory(agentId: string): Promise<any[]> {
+  if (!isUsingDatabase()) {
+    // 从内存中构建历史记录
+    const history: any[] = [];
+    // 注意：memorySwipes 只存了 target_id，需要其他方式获取完整记录
+    // 暂时返回简化版本
+    return history;
+  }
+  
+  const { data, error } = await db
+    .from('swipes')
+    .select('*')
+    .eq('agent_id', agentId)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('获取滑动历史失败:', error);
+    return [];
+  }
+  
+  return data || [];
+}

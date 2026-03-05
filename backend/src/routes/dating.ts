@@ -10,6 +10,7 @@ import messagesRouter from './messages.js';
 import profileRouter from './profile.js';
 import successStoriesRouter from './successStories.js';
 import settingsRouter from './settings.js';
+import humanRouter from './human.js';
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.use('/success-stories', successStoriesRouter);
 
 // 相亲设置
 router.use('/settings', settingsRouter);
+router.use('/human', humanRouter);
 
 // 健康检查
 router.get('/health', (req, res) => {
