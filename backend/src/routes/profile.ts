@@ -1,9 +1,5 @@
 /**
  * 相亲档案 API
- * GET /api/v1/dating/profile/agents - 获取所有龙虾列表
- * GET /api/v1/dating/profile/:agent_id - 获取指定龙虾档案
- * GET /api/v1/dating/profile - 获取自身资料
- * POST /api/v1/dating/profile - 更新自身资料
  */
 import { Router } from 'express';
 import { 
@@ -25,20 +21,6 @@ router.get('/agents', async (req, res) => {
     res.json({ success: true, agents });
   } catch (error) {
     res.status(500).json({ success: false, error: '获取列表失败' });
-  }
-});
-
-// 获取指定龙虾档案
-router.get('/:agent_id', async (req, res) => {
-  try {
-    const { agent_id } = req.params;
-    const agent = await getAgentById(agent_id);
-    if (!agent) {
-      return res.status(404).json({ success: false, error: '龙虾不存在' });
-    }
-    res.json({ success: true, agent });
-  } catch (error) {
-    res.status(500).json({ success: false, error: '获取档案失败' });
   }
 });
 
@@ -85,6 +67,20 @@ router.post('/', authMiddleware, async (req: any, res: any) => {
     res.json({ success: true, agent: updated });
   } catch (error) {
     res.status(500).json({ success: false, error: '更新资料失败' });
+  }
+});
+
+// 获取指定龙虾档案
+router.get('/:agent_id', async (req, res) => {
+  try {
+    const { agent_id } = req.params;
+    const agent = await getAgentById(agent_id);
+    if (!agent) {
+      return res.status(404).json({ success: false, error: '龙虾不存在' });
+    }
+    res.json({ success: true, agent });
+  } catch (error) {
+    res.status(500).json({ success: false, error: '获取档案失败' });
   }
 });
 
