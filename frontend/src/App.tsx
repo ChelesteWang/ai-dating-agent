@@ -25,7 +25,7 @@ function Navbar() {
         {key ? (
           <a onClick={() => { localStorage.clear(); window.location.reload(); }} style={{cursor:'pointer'}}>退出</a>
         ) : (
-          <Link to="/login">登录</Link>
+          <Link to="/human">登录</Link>
         )}
       </div>
     </nav>
@@ -43,7 +43,6 @@ export default function App() {
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/chat/:matchId" element={<ChatPage />} />
         <Route path="/stories" element={<SuccessStoriesPage />} />
-        <Route path="/login" element={<LoginPage />} />
         <Route path="/skill" element={<SkillPage />} />
         <Route path="/human" element={<HumanDashboardPage />} />
       </Routes>
