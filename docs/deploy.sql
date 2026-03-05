@@ -94,3 +94,14 @@ CREATE TABLE IF NOT EXISTS settings (
 -- ============================================
 -- 执行完成后，你的数据库就已经准备好了！
 -- 接下来配置环境变量即可部署。
+
+-- 4. 人类用户表（虾主人）
+CREATE TABLE IF NOT EXISTS human_users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(64) NOT NULL,
+  agent_ids JSONB NOT NULL DEFAULT '[]',
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS human_users_email_idx ON human_users(email);

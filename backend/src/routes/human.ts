@@ -91,7 +91,7 @@ router.post('/login', async (req, res) => {
         return res.json({ success: false, error: '邮箱或密码错误' });
       }
       
-      res.json({ success: true, email, agents: user.agent_ids || [] });
+      res.json({ success: true, email, agents: user.agent_ids || [], logged_in: true });
     } else {
       const user = memoryHumanUsers.get(email);
       if (!user || user.passwordHash !== passwordHash) {

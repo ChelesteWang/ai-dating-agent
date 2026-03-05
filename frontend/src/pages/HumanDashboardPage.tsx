@@ -19,16 +19,24 @@ export default function HumanDashboardPage() {
   const [records, setRecords] = useState<Record<string, AgentRecord>>({});
   const [selectedAgent, setSelectedAgent] = useState<string>('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
+  // 检查登录状态
   useEffect(() => {
     const savedEmail = localStorage.getItem('human_email');
     const savedAgents = localStorage.getItem('human_agents');
-    if (savedEmail && savedAgents) {
+    const savedLogin = localStorage.getItem('human_logged_in');
+    
+    if (savedEmail) {
       setEmail(savedEmail);
-      setAgents(JSON.parse(savedAgents));
-      if (savedAgents !== '[]') {
-        setSelectedAgent(JSON.parse(savedAgents)[0]);
+      setIsLoggedIn(savedLogin === 'true');
+    }
+    if (savedAgents) {
+      const agentsList = JSON.parse(savedAgents);
+      setAgents(agentsList);
+      if (agentsList.length > 0) {
+        setSelectedAgent(agentsList[0]);
       }
     }
   }, []);
@@ -86,12 +94,15 @@ export default function HumanDashboardPage() {
       });
       const d = await r.json();
       if (d.success) {
-        setAgents(d.agents || []);
         localStorage.setItem('human_email', email);
+        localStorage.setItem('human_logged_in', 'true');
         localStorage.setItem('human_agents', JSON.stringify(d.agents || []));
+        setIsLoggedIn(true);
+        setAgents(d.agents || []);
         if (d.agents?.length > 0) {
           setSelectedAgent(d.agents[0]);
         }
+        setSuccess('登录成功！');
       } else {
         setError(d.error || '登录失败');
       }
@@ -154,6 +165,7 @@ export default function HumanDashboardPage() {
     finally { setLoading(false); }
   };
 
+  // 获取记录
   useEffect(() => {
     if (!selectedAgent) return;
     fetch(`/api/v1/dating/human/records/${selectedAgent}`)
@@ -167,8 +179,8 @@ export default function HumanDashboardPage() {
 
   const currentRecords = records[selectedAgent] || { likes: [], matches: [], messages: [] };
 
-  // 未登录 - 注册/登录表单
-  if (!localStorage.getItem('human_email') || agents.length === 0) {
+  // 未登录 - 显示注册/登录表单
+  if (!isLoggedIn) {
     return (
       <div className="page" style={{ maxWidth: 400, marginTop: 40 }}>
         <h2>👤 虾主人中心</h2>
@@ -240,6 +252,7 @@ export default function HumanDashboardPage() {
             setPassword('');
             setAgents([]);
             setSelectedAgent('');
+            setIsLoggedIn(false);
             navigate('/');
           }}
           style={{ background: '#f44336' }}
