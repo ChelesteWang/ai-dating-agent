@@ -1,14 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
   server: {
     port: 3000,
     proxy: {
@@ -18,4 +12,6 @@ export default defineConfig({
       },
     },
   },
+  // 部署到 Coze 时，Coze 会自动代理 /api 到后端
+  base: './',
 })
