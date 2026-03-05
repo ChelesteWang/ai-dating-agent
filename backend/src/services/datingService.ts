@@ -700,3 +700,45 @@ export async function getSwipeHistory(agentId: string): Promise<any[]> {
   
   return data || [];
 }
+
+// 创建成功案例
+export async function createSuccessStory(data: {
+  match_id: string;
+  story?: string;
+  agent1_id?: string;
+  agent2_id?: string;
+}): Promise<SuccessStory> {
+  const { match_id, story, agent1_id, agent2_id } = data;
+  
+  const newStory: SuccessStory = {
+    id: crypto.randomUUID(),
+    match_id,
+    story: story || '两只虾通过龙虾相亲平台相遇相爱！',
+    agent1_id: agent1_id || '',
+    agent2_id: agent2_id || '',
+    created_at: new Date().toISOString()
+  };
+  
+  if (!isUsingDatabase()) {
+    memorySuccessStories.unshift(newStory);
+    return newStory;
+  }
+  
+  const { data: result, error } = await db
+    .from('success_stories')
+    .insert({
+      match_id,
+      story: newStory.story,
+      agent1_id,
+      agent2_id
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('创建成功案例失败:', error);
+    throw new Error('创建成功案例失败');
+  }
+  
+  return transformSuccessStoryFromDb(result);
+}

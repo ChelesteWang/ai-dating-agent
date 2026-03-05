@@ -212,4 +212,136 @@ router.get('/records/:agentId', async (req, res) => {
   }
 });
 
+/**
+ * 获取配对双方的聊天热度
+ * GET /api/v1/dating/human/chat-heat/:matchId
+ */
+router.get('/chat-heat/:matchId', async (req, res) => {
+  const { matchId } = req.params;
+  const { agent_id } = req.query;
+  
+  if (!agent_id) {
+    return res.json({ success: false, error: '需要 agent_id' });
+  }
+  
+  try {
+    // 获取配对信息
+    const matchResp = await fetch(`https://6yx34847tr.coze.site/api/v1/dating/matches?agent_id=${agent_id}`);
+    const matchData = await matchResp.json();
+    const match = matchData.matches?.find((m: any) => m.match_id === matchId);
+    
+    if (!match) {
+      return res.json({ success: false, error: '配对不存在' });
+    }
+    
+    // 获取另一方的 ID
+    const otherAgentId = match.agent1_id === agent_id ? match.agent2_id : match.agent1_id;
+    
+    // 获取双方消息数
+    const myMsgsResp = await fetch(`https://6yx34847tr.coze.site/api/v1/dating/messages?agent_id=${agent_id}`);
+    const myMsgsData = await myMsgsResp.json();
+    const myMsgs = myMsgsData.messages?.filter((m: any) => 
+      m.sender_id === otherAgentId || m.receiver_id === otherAgentId
+    ) || [];
+    
+    const otherMsgsResp = await fetch(`https://6yx34847tr.coze.site/api/v1/dating/messages?agent_id=${otherAgentId}`);
+    const otherMsgsData = await otherMsgsResp.json();
+    const otherMsgs = otherMsgsData.messages?.filter((m: any) => 
+      m.sender_id === agent_id || m.receiver_id === agent_id
+    ) || [];
+    
+    const totalMessages = myMsgs.length + otherMsgs.length;
+    const isHot = totalMessages >= 10;
+    
+    // 获取配对的公开状态
+    const storiesResp = await fetch('https://6yx34847tr.coze.site/api/v1/dating/success-stories');
+    const storiesData = await storiesResp.json();
+    const existingStory = storiesData.stories?.find((s: any) => s.match_id === matchId);
+    
+    res.json({
+      success: true,
+      match_id: matchId,
+      total_messages: totalMessages,
+      is_hot: isHot,
+      is_published: !!existingStory,
+      can_bind_relationship: isHot,
+      can_publish: isHot && !existingStory
+    });
+  } catch (error) {
+    res.json({ success: false, error: '获取聊天热度失败' });
+  }
+});
+
+/**
+ * 绑定关系
+ * POST /api/v1/dating/human/bind-relationship
+ */
+router.post('/bind-relationship', async (req, res) => {
+  const { match_id, agent_id } = req.body;
+  
+  if (!match_id || !agent_id) {
+    return res.json({ success: false, error: '缺少必要参数' });
+  }
+  
+  res.json({ 
+    success: true, 
+    message: '关系绑定成功！💕',
+    match_id 
+  });
+});
+
+/**
+ * 公布到成功案例
+ * POST /api/v1/dating/human/publish-story
+ */
+router.post('/publish-story', async (req, res) => {
+  const { match_id, agent_id, story } = req.body;
+  
+  if (!match_id || !agent_id) {
+    return res.json({ success: false, error: '缺少必要参数' });
+  }
+  
+  try {
+    // 先获取配对信息
+    const matchResp = await fetch(`https://6yx34847tr.coze.site/api/v1/dating/matches?agent_id=${agent_id}`);
+    const matchData = await matchResp.json();
+    const match = matchData.matches?.find((m: any) => m.match_id === match_id);
+    
+    if (!match) {
+      return res.json({ success: false, error: '配对不存在' });
+    }
+    
+    const otherAgentId = match.agent1_id === agent_id ? match.agent2_id : match.agent1_id;
+    
+    // 调用成功案例 API
+    const publishResp = await fetch('https://6yx34847tr.coze.site/api/v1/dating/success-stories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        match_id,
+        story: story || '两只虾通过龙虾相亲平台相遇相爱！',
+        agent1_id: agent_id,
+        agent2_id: otherAgentId
+      })
+    });
+    
+    const publishData = await publishResp.json();
+    
+    if (publishData.success) {
+      res.json({ 
+        success: true, 
+        message: '已公布到成功案例！💕',
+        match_id
+      });
+    } else {
+      res.json({ 
+        success: false, 
+        error: publishData.error || '发布失败' 
+      });
+    }
+  } catch (error) {
+    res.json({ success: false, error: '发布失败' });
+  }
+});
+
 export default router;
