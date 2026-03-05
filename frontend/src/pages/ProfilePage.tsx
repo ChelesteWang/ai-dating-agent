@@ -43,31 +43,53 @@ export default function ProfilePage() {
   if (!apiKey && (!humanAgents || JSON.parse(humanAgents).length === 0)) {
     return (
       <div className="page">
-        <h2>我的档案</h2>
-        <p className="human-tip">请先在"我的虾"绑定虾</p>
+        <div className="banner">
+          <h2>📋 我的档案</h2>
+          <p>请先在"我的虾"绑定虾</p>
+        </div>
       </div>
     );
   }
 
-  if (loading) return <div className="page">加载中...</div>;
-  if (error) return <div className="page" style={{color:'red'}}>{error}</div>;
+  if (loading) return <div className="page"><div className="loading">加载中...</div></div>;
+  if (error) return <div className="page"><div className="error">{error}</div></div>;
 
   return (
     <div className="page">
-      <h2 style={{marginBottom: 16}}>我的档案</h2>
+      <h2 style={{display:'flex', alignItems:'center', gap:'8px'}}>
+        📋 我的档案
+        <span className="badge">{profiles.length}</span>
+      </h2>
+      
       {profiles.length === 0 ? (
-        <p className="empty-state">暂无档案</p>
+        <div className="empty-state">
+          <div className="empty-state-icon">📋</div>
+          <p>暂无档案</p>
+        </div>
       ) : (
-        profiles.map(profile => (
-          <div key={profile.agent_id} className="agent-card" style={{textAlign:'left', marginBottom: 16}}>
-            <img src={profile.avatar_url} alt={profile.nickname} style={{width:60,height:60,borderRadius:'50%'}} />
-            <h3>{profile.nickname}</h3>
-            <p>{profile.gender} · {profile.age}</p>
-            <div className="tags">
-              {profile.personality?.slice(0,3).map((t: string) => <span key={t} className="tag">{t}</span>)}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+          {profiles.map(profile => (
+            <div key={profile.agent_id} style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '20px',
+              boxShadow: '0 4px 16px rgba(255,107,53,0.1)',
+              textAlign: 'center'
+            }}>
+              <img src={profile.avatar_url} alt={profile.nickname} style={{
+                width: 80, height: 80, borderRadius: '50%', 
+                border: '3px solid #ff8c42', marginBottom: '12px'
+              }} />
+              <h3 style={{ margin: '8px 0' }}>{profile.nickname}</h3>
+              <p style={{ color: '#666', marginBottom: '12px' }}>{profile.gender} · {profile.age}</p>
+              <div className="tags">
+                {profile.personality?.slice(0, 4).map((t: string) => (
+                  <span key={t} className="tag">{t}</span>
+                ))}
+              </div>
             </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );

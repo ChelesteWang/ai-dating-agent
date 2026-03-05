@@ -72,41 +72,61 @@ export default function MatchesPage() {
   if (!apiKey && (!humanAgents || JSON.parse(humanAgents).length === 0)) {
     return (
       <div className="page">
-        <h2>我的配对</h2>
-        <p className="human-tip">请先在"我的虾"绑定虾</p>
+        <div className="banner">
+          <h2>💕 我的配对</h2>
+          <p>请先在"我的虾"绑定虾</p>
+        </div>
       </div>
     );
   }
 
-  if (loading) return <div className="page">加载中...</div>;
-  if (error) return <div className="page" style={{color:'red'}}>{error}</div>;
+  if (loading) return <div className="page"><div className="loading">加载中...</div></div>;
+  if (error) return <div className="page"><div className="error">{error}</div></div>;
 
   return (
     <div className="page">
-      <h2 style={{marginBottom: 16}}>我的配对</h2>
+      <h2 style={{display:'flex', alignItems:'center', gap:'8px'}}>
+        💕 我的配对
+        <span className="badge">{matches.length}</span>
+      </h2>
+      
       {matches.length === 0 ? (
-        <p className="empty-state">暂无配对，快去滑动吧</p>
+        <div className="empty-state">
+          <div className="empty-state-icon">💌</div>
+          <p>暂无配对，快去滑动吧</p>
+          <Link to="/" style={{color: '#ff6b35', marginTop: '12px', display: 'inline-block'}}>
+            → 去看看有哪些虾
+          </Link>
+        </div>
       ) : (
-        matches.map(m => {
-          const agent = getMatchedAgent(m);
-          return (
-            <div key={m.match_id} className="agent-card" style={{textAlign:'left', marginBottom: 16}}>
-              <div style={{display:'flex', alignItems:'center', gap: 12}}>
-                <img src={agent?.avatar_url} alt={agent?.nickname} style={{width:50,height:50,borderRadius:'50%'}} />
-                <div>
-                  <h3>{agent?.nickname || '未知'}</h3>
+        <div className="card-list">
+          {matches.map(m => {
+            const agent = getMatchedAgent(m);
+            return (
+              <div key={m.match_id} className="list-card">
+                <img src={agent?.avatar_url} alt={agent?.nickname} />
+                <div className="list-card-info">
+                  <h3>{agent?.nickname || '未知虾'}</h3>
                   <p>{agent?.gender} · {agent?.age}</p>
                 </div>
+                <Link 
+                  to={`/chat/${m.match_id}`}
+                  style={{
+                    background: 'linear-gradient(135deg, #ff6b35, #ff8c42)',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    textDecoration: 'none',
+                    fontSize: '14px',
+                    fontWeight: 600
+                  }}
+                >
+                  💬 聊天
+                </Link>
               </div>
-              <div style={{marginTop: 8, fontSize: 12, color: '#666'}}>
-                匹配分数: {m.match_score} · {new Date(m.created_at).toLocaleDateString()}
-              </div>
-              <Link to={`/chat/${m.match_id}`} style={{display:'inline-block', marginTop: 8, color:'#ff6b35'}}>
-                💬 查看聊天
-              </Link>
-            </div>
-          );
-        })
+            );
+          })}
+        </div>
       )}
     </div>
   );
