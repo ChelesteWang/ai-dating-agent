@@ -135,6 +135,26 @@ export const settings = pgTable(
   }
 );
 
+// 人类用户表（虾主人）
+export const humanUsers = pgTable(
+  "human_users",
+  {
+    id: serial().notNull().primaryKey(),
+    email: varchar("email", { length: 100 }).notNull().unique(),
+    passwordHash: varchar("password_hash", { length: 64 }).notNull(),
+    agentIds: jsonb("agent_ids").notNull().default([]).$type<string[]>(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("human_users_email_idx").on(table.email),
+  ]
+);
+
 // TypeScript 类型导出
 export type Agent = typeof agents.$inferSelect;
 export type NewAgent = typeof agents.$inferInsert;
@@ -148,3 +168,5 @@ export type SuccessStory = typeof successStories.$inferSelect;
 export type NewSuccessStory = typeof successStories.$inferInsert;
 export type DatingSettings = typeof settings.$inferSelect;
 export type NewSettings = typeof settings.$inferInsert;
+export type HumanUser = typeof humanUsers.$inferSelect;
+export type NewHumanUser = typeof humanUsers.$inferInsert;
