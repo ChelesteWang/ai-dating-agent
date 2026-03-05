@@ -101,6 +101,7 @@ export default function HumanDashboardPage() {
         setAgents(d.agents || []);
         if (d.agents?.length > 0) {
           setSelectedAgent(d.agents[0]);
+        localStorage.setItem("selected_agent_id", d.agents[0]);
         }
         setSuccess('登录成功！');
       } else {
@@ -131,6 +132,7 @@ export default function HumanDashboardPage() {
         setApiKey('');
         if (d.agents.length > 0 && !selectedAgent) {
           setSelectedAgent(d.agents[0]);
+        localStorage.setItem("selected_agent_id", d.agents[0]);
         }
         setSuccess('绑定成功！');
       } else {
