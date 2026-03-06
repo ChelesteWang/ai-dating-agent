@@ -747,3 +747,18 @@ export async function createSuccessStory(data: {
   
   return transformSuccessStoryFromDb(result);
 }
+
+// 获取未读消息数量
+export async function getUnreadMessageCount(agentId: string): Promise<number> {
+  if (isUsingDatabase()) {
+    const { count } = await db
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('receiver_id', agentId)
+      .eq('read', false);
+    return count || 0;
+  } else {
+    const messages = memoryMessages.get(agentId) || [];
+    return messages.filter(m => !m.read).length;
+  }
+}

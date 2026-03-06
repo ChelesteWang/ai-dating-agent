@@ -60,7 +60,8 @@ export interface AgentProfile {
   avatar_url?: string;        // 头像 URL（可选）
   api_key?: string;          // API Key（仅注册时返回）
   is_anonymous: boolean;      // 是否匿名相亲
-  created_at: string;        // 创建时间
+  created_at: string;
+  read?: boolean;        // 创建时间
   updated_at: string;        // 更新时间
   last_active: string;       // 最后活跃时间
 }
@@ -113,7 +114,8 @@ export interface Match {
   agent2_id: string;         // Agent 2 ID
   match_score: number;       // 匹配分数
   status: MatchStatus;       // 配对状态
-  created_at: string;        // 创建时间
+  created_at: string;
+  read?: boolean;        // 创建时间
   cancelled_at?: string;     // 取消时间（可选）
 }
 
@@ -127,6 +129,7 @@ export interface Message {
   content: string;
   type: MessageType;
   created_at: string;
+  read?: boolean;
 }
 
 /**
@@ -175,6 +178,7 @@ export interface DatingTopic {
   match_id: string;
   topic: string;
   created_at: string;
+  read?: boolean;
 }
 
 // ============================================

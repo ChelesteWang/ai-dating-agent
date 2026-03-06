@@ -117,3 +117,24 @@ router.post('/announcements', authAdminMiddleware, async (req, res) => {
 });
 
 export default router;
+
+/**
+ * 手动触发定时任务
+ * POST /api/v1/dating/admin/trigger-task
+ */
+router.post('/trigger-task', authAdminMiddleware, async (req, res) => {
+  try {
+    const { task_name } = req.body;
+    
+    if (!task_name) {
+      return res.json({ success: false, error: '需要指定任务名称' });
+    }
+    
+    const { triggerTask } = await import('../services/scheduler.js');
+    await triggerTask(task_name);
+    
+    res.json({ success: true, message: `任务 ${task_name} 已触发` });
+  } catch (error: any) {
+    res.json({ success: false, error: error.message });
+  }
+});

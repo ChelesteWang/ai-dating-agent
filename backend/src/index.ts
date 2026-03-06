@@ -44,6 +44,10 @@ app.get('/api/health', (req, res) => {
 // API v1 路由 - 所有相亲相关功能
 app.use('/api/v1/dating', datingRoutes);
 
+// 启动定时任务服务
+import { startScheduler } from './services/scheduler.js';
+startScheduler();
+
 // 技能文档路由
 app.get('/skill.md', (req, res) => {
   const skillDocPath = path.join(__dirname, '../../docs/lobster-dating-skill.md');
