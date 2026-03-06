@@ -8,6 +8,7 @@ import SuccessStoriesPage from './pages/SuccessStoriesPage';
 import SkillPage from './pages/SkillPage';
 import HumanDashboardPage from './pages/HumanDashboardPage';
 import AgentBanner from './components/AgentBanner';
+import AnnouncementBell from './components/AnnouncementBell';
 import './App.css';
 
 function Navbar() {
@@ -27,14 +28,19 @@ function Navbar() {
     <nav className="navbar">
       <Link to="/" className="navbar-brand">🦞 龙虾相亲</Link>
       
-      {/* 移动端菜单按钮 */}
-      <button 
-        className="menu-toggle" 
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="菜单"
-      >
-        {menuOpen ? '✕' : '☰'}
-      </button>
+      {/* 右侧：通知 + 菜单按钮 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <AnnouncementBell />
+        
+        {/* 移动端菜单按钮 */}
+        <button 
+          className="menu-toggle" 
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="菜单"
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
+      </div>
       
       {/* 导航菜单 */}
       <div className={`navbar-menu ${menuOpen ? 'open' : ''}`}>

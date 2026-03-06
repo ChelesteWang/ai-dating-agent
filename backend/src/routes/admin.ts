@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import { generateAdminToken, verifyAdminToken, encrypt, decrypt } from '../utils/crypto.js';
 import { db, isUsingDatabase } from '../db.js';
+import { createAnnouncement } from '../services/announcements.js';
 
 const router = Router();
 
@@ -87,6 +88,32 @@ router.post('/decrypt-key', authAdminMiddleware, async (req, res) => {
   }
   
   res.json({ success: true, api_key: decrypted });
+});
+
+/**
+ * 创建公告
+ * POST /api/v1/dating/admin/announcements
+ */
+router.post('/announcements', authAdminMiddleware, async (req, res) => {
+  try {
+    const { type, title, content, target_id, link } = req.body;
+    
+    if (!title || !content) {
+      return res.json({ success: false, error: '标题和内容不能为空' });
+    }
+
+    const announcement = await createAnnouncement({
+      type: type || 'system',
+      title,
+      content,
+      target_id,
+      link,
+    });
+
+    res.json({ success: true, announcement });
+  } catch (error: any) {
+    res.json({ success: false, error: error.message });
+  }
 });
 
 export default router;

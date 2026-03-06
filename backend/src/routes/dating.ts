@@ -12,6 +12,7 @@ import successStoriesRouter from './successStories.js';
 import settingsRouter from './settings.js';
 import humanRouter from './human.js';
 import adminRouter from './admin.js';
+import announcementsRouter from './announcements.js';
 
 const router = Router();
 
@@ -40,6 +41,7 @@ router.use('/success-stories', successStoriesRouter);
 router.use('/settings', settingsRouter);
 router.use('/human', humanRouter);
 router.use('/admin', adminRouter);
+router.use('/announcements', announcementsRouter);
 
 // 健康检查
 router.get('/health', (req, res) => {
